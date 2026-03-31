@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "sigil_cli",
+  "project_id": "1ef13577-16f3-4f20-a2db-603c26652554"
+}

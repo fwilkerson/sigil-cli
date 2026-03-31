@@ -1,0 +1,14 @@
+version: "2"
+
+linters:
+  enable:
+    - errcheck
+    - gocritic
+    - govet
+    - modernize
+    - revive
+    - staticcheck
+
+formatters:
+  enable:
+    - gofumpt
