@@ -1,0 +1,204 @@
+syntax = "proto3";
+
+package sigil.trust.v1;
+
+option go_package = "sigil.dev/trust-service/api/v1;apiv1";
+
+import "google/protobuf/timestamp.proto";
+
+// TrustService provides tool trust queries and attestation submission.
+//
+// Privacy design:
+//   - ListAttestations filters by tool, NOT by attester. Attester DIDs are
+//     redacted in list responses to prevent cross-tool enumeration of usage
+//     patterns.
+//   - GetAttestation returns full details (including attester DID) for a
+//     single attestation by ID, preserving independent verifiability.
+//   - A future GetMyAttestations RPC (authenticated) can be added when needed.
+service TrustService {
+  // SubmitAttestation records a signed tool attestation.
+  //
+  // Timestamp acceptance window: issued_at must be within 5 minutes in the
+  // future or 24 hours in the past relative to server time.
+  //
+  // Only did:key attesters are accepted initially.
+  //
+  // Rate limit: 50 attestations per DID per hour.
+  rpc SubmitAttestation(SubmitAttestationRequest) returns (SubmitAttestationResponse);
+
+  // GetToolTrust returns the computed trust digest for a tool.
+  // Unknown tools return a zero-value digest (not NOT_FOUND).
+  rpc GetToolTrust(GetToolTrustRequest) returns (GetToolTrustResponse);
+
+  // GetAttestation retrieves a single attestation by ID with full details
+  // including the attester DID (for independent verification).
+  rpc GetAttestation(GetAttestationRequest) returns (GetAttestationResponse);
+
+  // ListAttestations returns attestations for a tool with attester DIDs
+  // redacted to prevent enumeration.
+  rpc ListAttestations(ListAttestationsRequest) returns (ListAttestationsResponse);
+
+  // ListTopTools returns tools ranked by trust score within a time window.
+  rpc ListTopTools(ListTopToolsRequest) returns (ListTopToolsResponse);
+
+  // RetractAttestation soft-deletes an attestation. Only the original attester
+  // can retract, verified by Ed25519 signature over a canonical deletion payload.
+  rpc RetractAttestation(RetractAttestationRequest) returns (RetractAttestationResponse);
+}
+
+// SubmitAttestation
+
+message SubmitAttestationRequest {
+  // Attestation ID (ULID). Acts as idempotency key: duplicate IDs with same
+  // content return ALREADY_EXISTS; different content returns ABORTED.
+  string attestation_id = 1;
+
+  // Attester DID (must be did:key).
+  string attester_did = 2;
+
+  // Tool URI (e.g. "mcp://github.com/user/repo").
+  string tool_uri = 3;
+
+  // Outcome: "success" or "negative".
+  string outcome = 4;
+
+  // Optional claims (max 32 keys, 8 KB total, 64 byte keys, 1 KB values).
+  map<string, string> claims = 5;
+
+  // Payload version string.
+  string version = 6;
+
+  // Ed25519 signature over the canonical attestation payload.
+  bytes signature = 7;
+
+  // When the attestation was issued by the attester.
+  google.protobuf.Timestamp issued_at = 8;
+}
+
+message SubmitAttestationResponse {
+  string attestation_id = 1;
+  bool   deduplicated   = 2;  // true when a matching positive already existed
+}
+
+// GetToolTrust
+
+message GetToolTrustRequest {
+  // Tool URI to look up.
+  string tool_uri = 1;
+}
+
+message GetToolTrustResponse {
+  double score = 1;
+  int32 total_attestations = 2;
+  int32 unique_attesters = 3;
+  double success_rate = 4;
+  google.protobuf.Timestamp last_active = 5;
+  google.protobuf.Timestamp first_seen = 6;
+  bool provisional = 7;
+  google.protobuf.Timestamp computed_at = 8;
+  int32  versions_attested = 9;   // count of distinct non-empty versions
+  string latest_version    = 10;  // most recently attested version string
+}
+
+// GetAttestation
+
+message GetAttestationRequest {
+  string attestation_id = 1;
+}
+
+message GetAttestationResponse {
+  Attestation attestation = 1;
+}
+
+// ListAttestations
+
+message ListAttestationsRequest {
+  // Required: tool URI to list attestations for.
+  string tool_uri = 1;
+
+  // Optional time range filters.
+  google.protobuf.Timestamp after = 2;
+  google.protobuf.Timestamp before = 3;
+
+  int32 limit = 4;
+  string page_token = 5;
+}
+
+message ListAttestationsResponse {
+  repeated RedactedAttestation attestations = 1;
+  string next_page_token = 2;
+}
+
+// ListTopTools
+
+message ListTopToolsRequest {
+  // Time window in days (default 30).
+  int32 window_days = 1;
+
+  // Max tools to return (default 50, max 100).
+  int32 limit = 2;
+
+  // Minimum age in days: tools must have first attestation older than this
+  // to appear on the leaderboard (prevents gaming by new tools).
+  int32 min_age_days = 3;
+}
+
+message ListTopToolsResponse {
+  repeated ToolSummary tools = 1;
+}
+
+// Shared messages
+
+// Attestation with full details (returned by GetAttestation).
+message Attestation {
+  string id = 1;
+  string attester_did = 2;
+  string tool_uri = 3;
+  string outcome = 4;
+  map<string, string> claims = 5;
+  string version = 6;
+  bytes signature = 7;
+  google.protobuf.Timestamp issued_at = 8;
+}
+
+// RedactedAttestation has the attester DID truncated to prevent enumeration.
+message RedactedAttestation {
+  string id = 1;
+  string attester_did_prefix = 2; // First 16 chars of the DID.
+  string tool_uri = 3;
+  string outcome = 4;
+  map<string, string> claims = 5;
+  string version = 6;
+  google.protobuf.Timestamp issued_at = 7;
+}
+
+// ToolSummary is a tool entry in the top-tools leaderboard.
+message ToolSummary {
+  string tool_uri = 1;
+  double score = 2;
+  int32 total_attestations = 3;
+  int32 unique_attesters = 4;
+  double success_rate = 5;
+  google.protobuf.Timestamp first_seen = 6;
+  google.protobuf.Timestamp last_active = 7;
+  bool provisional = 8;
+}
+
+// RetractAttestation
+
+message RetractAttestationRequest {
+  // Attestation ID to retract.
+  string attestation_id = 1;
+
+  // DID of the original attester (must match the stored attester_did).
+  string attester_did = 2;
+
+  // Ed25519 signature over the canonical deletion payload:
+  // {"action":"retract","attestation_id":"<id>","attester_did":"<did>"}
+  bytes signature = 3;
+}
+
+message RetractAttestationResponse {
+  // ID of the retracted attestation.
+  string attestation_id = 1;
+}
