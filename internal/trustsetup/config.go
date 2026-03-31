@@ -1,3 +1,5 @@
+// Package trustsetup manages identity, configuration, and gRPC connectivity
+// for the trust service CLI commands.
 package trustsetup
 
 import (
@@ -71,6 +73,3 @@ func SaveConfig(configDir string, cfg *Config) error {
 	}
 	return fsutil.WriteFileAtomic(ConfigPath(configDir), data, 0o600)
 }
-
-// BoolPtr returns a pointer to b.
-func BoolPtr(b bool) *bool { return &b }

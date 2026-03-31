@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"runtime"
 
 	"github.com/spf13/cobra"
@@ -19,9 +18,9 @@ func newVersionCmd() *cobra.Command {
 			cmd.Printf("go: %s\n", runtime.Version())
 			cmd.Printf("os/arch: %s/%s\n", runtime.GOOS, runtime.GOARCH)
 			if buildinfo.Version == "dev" {
-				fmt.Fprintln(cmd.ErrOrStderr(), "build: dev (all commands)")
+				cmd.PrintErrln("build: dev (all commands)")
 			} else {
-				fmt.Fprintln(cmd.ErrOrStderr(), "build: release")
+				cmd.PrintErrln("build: release")
 			}
 		},
 	}

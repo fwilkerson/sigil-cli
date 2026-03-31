@@ -9,9 +9,9 @@ import (
 
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	trustpb "github.com/fwilkerson/sigil-cli/api/trust/v1"
 	"github.com/fwilkerson/sigil-cli/sigil/id"
 	"github.com/fwilkerson/sigil-cli/sigil/toolattest"
-	trustpb "github.com/fwilkerson/sigil-cli/api/trust/v1"
 )
 
 func toolID(t *testing.T, uri string) id.ToolID {

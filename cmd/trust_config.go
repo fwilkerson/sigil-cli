@@ -57,9 +57,9 @@ func newTrustConfigSetCmd() *cobra.Command {
 				v := strings.ToLower(args[1])
 				switch v {
 				case "true", "1", "yes":
-					cfg.AutoAttest = trustsetup.BoolPtr(true)
+					cfg.AutoAttest = new(true)
 				case "false", "0", "no":
-					cfg.AutoAttest = trustsetup.BoolPtr(false)
+					cfg.AutoAttest = new(false)
 				default:
 					return fmt.Errorf("invalid value %q: must be true or false", args[1])
 				}

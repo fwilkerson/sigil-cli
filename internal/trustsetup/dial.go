@@ -1,4 +1,3 @@
-
 package trustsetup
 
 import (

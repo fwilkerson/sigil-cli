@@ -408,13 +408,9 @@ func TestZeroID_Time(t *testing.T) {
 	t.Run("ActorID", func(t *testing.T) {
 		t.Parallel()
 		var v id.ActorID
-		ts := v.Time()
-		if ts.IsZero() {
-			// ulid.Time(0) returns the Unix epoch, which is non-zero in Go's
-			// time.Time representation, so reaching here would be a surprise.
-			// We only require no panic.
-		}
-		_ = ts
+		// ulid.Time(0) returns the Unix epoch, which is non-zero in Go's
+		// time.Time representation. We only require no panic.
+		_ = v.Time()
 	})
 
 	t.Run("TransactionID", func(t *testing.T) {

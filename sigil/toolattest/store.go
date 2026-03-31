@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"maps"
 	"sync"
 	"time"
 
@@ -244,9 +245,7 @@ func copyAttestation(att *ToolAttestation) ToolAttestation {
 	cp := *att
 	if att.Claims != nil {
 		cp.Claims = make(map[string]string, len(att.Claims))
-		for k, v := range att.Claims {
-			cp.Claims[k] = v
-		}
+		maps.Copy(cp.Claims, att.Claims)
 	}
 	if att.Signature != nil {
 		cp.Signature = make([]byte, len(att.Signature))

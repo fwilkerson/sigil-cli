@@ -6,9 +6,9 @@ import (
 
 	"github.com/spf13/cobra"
 
+	trustpb "github.com/fwilkerson/sigil-cli/api/trust/v1"
 	"github.com/fwilkerson/sigil-cli/internal/pending"
 	"github.com/fwilkerson/sigil-cli/internal/trustsetup"
-	trustpb "github.com/fwilkerson/sigil-cli/api/trust/v1"
 )
 
 // addDevTrustCommands registers dev-only trust subcommands. Overridden by
@@ -69,7 +69,7 @@ func withTrustWrite(cmd *cobra.Command) *cobra.Command {
 			return fmt.Errorf("ensure identity: %w", err)
 		}
 		if created {
-			fmt.Fprintf(cmd.ErrOrStderr(), "Created your Sigil identity: %s\n", did)
+			cmd.PrintErrf("Created your Sigil identity: %s\n", did)
 		}
 
 		addr := trustAddr(cmd)
@@ -104,7 +104,7 @@ func flushPending(cmd *cobra.Command, setup *trustsetup.TrustSetup) {
 	sub := trustsetup.NewSubmitter(setup.Conn)
 	submitted, _, _ := queue.Flush(cmd.Context(), sub)
 	if submitted > 0 {
-		fmt.Fprintf(cmd.ErrOrStderr(), "Submitted %d pending attestation(s).\n", submitted)
+		cmd.PrintErrf("Submitted %d pending attestation(s).\n", submitted)
 	}
 }
 

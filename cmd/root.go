@@ -73,8 +73,8 @@ Quick start:
 				return
 			}
 			if msg := versioncheck.Check(cmd.Context(), buildinfo.Version, buildinfo.VersionURL, dir); msg != "" {
-				fmt.Fprintln(cmd.ErrOrStderr())
-				fmt.Fprintln(cmd.ErrOrStderr(), msg)
+				cmd.PrintErrln()
+				cmd.PrintErrln(msg)
 			}
 		},
 	}

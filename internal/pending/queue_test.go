@@ -11,9 +11,9 @@ import (
 	"github.com/fwilkerson/sigil-cli/sigil/trustclient"
 )
 
-// makePA returns a PendingAttestation with realistic fields for testing.
-func makePA(toolURI, outcome string) *pending.PendingAttestation {
-	return &pending.PendingAttestation{
+// makePA returns a Attestation with realistic fields for testing.
+func makePA(toolURI, outcome string) *pending.Attestation {
+	return &pending.Attestation{
 		AttestationID: "01ARZ3NDEKTSV4RRFFQ69G5FAV",
 		AttesterDID:   "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
 		ToolURI:       toolURI,

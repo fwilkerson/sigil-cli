@@ -45,7 +45,9 @@ func makeDIDWithKeySize(size int) identity.DID {
 	prefix := varBuf[:n]
 
 	payload := make([]byte, size) // all-zero key bytes of the requested length
-	buf := append(prefix, payload...)
+	buf := make([]byte, 0, len(prefix)+len(payload))
+	buf = append(buf, prefix...)
+	buf = append(buf, payload...)
 	encoded := "z" + testBase58Encode(buf)
 	return identity.DID("did:key:" + encoded)
 }

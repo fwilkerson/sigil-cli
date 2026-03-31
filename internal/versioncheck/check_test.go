@@ -13,7 +13,7 @@ import (
 
 func TestCheck_UpdateAvailable(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.Write([]byte("0.2.0"))
+		_, _ = w.Write([]byte("0.2.0"))
 	}))
 	defer srv.Close()
 
@@ -29,7 +29,7 @@ func TestCheck_UpdateAvailable(t *testing.T) {
 
 func TestCheck_AlreadyCurrent(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.Write([]byte("0.1.0"))
+		_, _ = w.Write([]byte("0.1.0"))
 	}))
 	defer srv.Close()
 
@@ -68,7 +68,7 @@ func TestCheck_CacheHit(t *testing.T) {
 
 	// Write a fresh cache saying latest is 0.3.0.
 	data := strconv.FormatInt(time.Now().Unix(), 10) + "\n0.3.0"
-	os.WriteFile(cacheFile, []byte(data), 0o644)
+	_ = os.WriteFile(cacheFile, []byte(data), 0o644)
 
 	// Should return update message without hitting network.
 	msg := Check(context.Background(), "0.1.0", "http://should-not-be-called", dir)
@@ -87,10 +87,10 @@ func TestCheck_CacheExpired(t *testing.T) {
 	// Write an expired cache.
 	old := time.Now().Add(-25 * time.Hour).Unix()
 	data := strconv.FormatInt(old, 10) + "\n0.3.0"
-	os.WriteFile(cacheFile, []byte(data), 0o644)
+	_ = os.WriteFile(cacheFile, []byte(data), 0o644)
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.Write([]byte("0.4.0"))
+		_, _ = w.Write([]byte("0.4.0"))
 	}))
 	defer srv.Close()
 

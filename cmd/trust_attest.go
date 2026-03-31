@@ -68,7 +68,7 @@ Always pass --version when available for the best signal.`,
 					if jsonFlag(cmd) {
 						cmd.Println(`{"status": "rate_limited"}`)
 					} else {
-						fmt.Fprintln(cmd.ErrOrStderr(), "Attestation skipped (rate limited).")
+						cmd.PrintErrln("Attestation skipped (rate limited).")
 					}
 					return nil
 				}
@@ -187,29 +187,27 @@ func buildClaims(intent, result, function, params, errorCode string) map[string]
 
 // printNegativeReview writes the negative attestation review block to stderr.
 func printNegativeReview(cmd *cobra.Command, ta *toolattest.ToolAttestation) {
-	w := cmd.ErrOrStderr()
-	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "=== Negative Attestation Review ===")
-	fmt.Fprintf(w, "Tool:    %s\n", ta.Tool)
-	fmt.Fprintf(w, "Version: %s\n", ta.Version)
-	fmt.Fprintf(w, "Outcome: %s\n", ta.Outcome)
+	cmd.PrintErrln()
+	cmd.PrintErrln("=== Negative Attestation Review ===")
+	cmd.PrintErrf("Tool:    %s\n", ta.Tool)
+	cmd.PrintErrf("Version: %s\n", ta.Version)
+	cmd.PrintErrf("Outcome: %s\n", ta.Outcome)
 	if len(ta.Claims) > 0 {
-		fmt.Fprintln(w, "Claims:")
+		cmd.PrintErrln("Claims:")
 		for k, v := range ta.Claims {
-			fmt.Fprintf(w, "  %s: %s\n", k, v)
+			cmd.PrintErrf("  %s: %s\n", k, v)
 		}
 	}
-	fmt.Fprintf(w, "Attester: %s\n", ta.Attester)
-	fmt.Fprintln(w, "===================================")
-	fmt.Fprintln(w, "")
+	cmd.PrintErrf("Attester: %s\n", ta.Attester)
+	cmd.PrintErrln("===================================")
+	cmd.PrintErrln()
 }
 
 // confirmNegative shows the negative attestation for mandatory pre-submission
 // review and returns true only if the user confirms.
 func confirmNegative(cmd *cobra.Command, ta *toolattest.ToolAttestation) bool {
 	printNegativeReview(cmd, ta)
-	w := cmd.ErrOrStderr()
-	fmt.Fprintf(w, "Submit this attestation? [y/N] ")
+	cmd.PrintErr("Submit this attestation? [y/N] ")
 
 	reader := bufio.NewReader(cmd.InOrStdin())
 	line, err := reader.ReadString('\n')
@@ -225,7 +223,7 @@ func confirmNegative(cmd *cobra.Command, ta *toolattest.ToolAttestation) bool {
 // on the next successful connection to the trust service.
 func enqueueAttestation(cmd *cobra.Command, ta *toolattest.ToolAttestation) error {
 	queue := pending.New(configDirFrom(cmd))
-	pa := &pending.PendingAttestation{
+	pa := &pending.Attestation{
 		AttestationID: ta.ID.String(),
 		AttesterDID:   string(ta.Attester),
 		ToolURI:       ta.Tool.String(),

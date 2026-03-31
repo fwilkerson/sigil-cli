@@ -18,10 +18,10 @@ import (
 	"github.com/fwilkerson/sigil-cli/sigil/trustclient"
 )
 
-// PendingAttestation holds a signed attestation that could not be submitted.
+// Attestation holds a signed attestation that could not be submitted.
 // All fields needed to reconstruct and submit the AttestationSubmission are
 // stored here together with housekeeping timestamps.
-type PendingAttestation struct {
+type Attestation struct {
 	AttestationID string            `json:"attestation_id"`
 	AttesterDID   string            `json:"attester_did"`
 	ToolURI       string            `json:"tool_uri"`
@@ -54,7 +54,7 @@ func New(configDir string) *Queue {
 
 // Enqueue persists pa as a JSON file in the queue directory. The directory is
 // created lazily on the first call.
-func (q *Queue) Enqueue(pa *PendingAttestation) error {
+func (q *Queue) Enqueue(pa *Attestation) error {
 	if err := os.MkdirAll(q.dir, 0o700); err != nil {
 		return fmt.Errorf("create pending-attestations dir: %w", err)
 	}
@@ -75,7 +75,7 @@ func (q *Queue) Enqueue(pa *PendingAttestation) error {
 
 // Pending returns all queued attestations, sorted by filename (ULID order =
 // creation order). Returns nil, nil when the queue directory does not exist.
-func (q *Queue) Pending() ([]*PendingAttestation, error) {
+func (q *Queue) Pending() ([]*Attestation, error) {
 	entries, err := os.ReadDir(q.dir)
 	if os.IsNotExist(err) {
 		return nil, nil
@@ -94,7 +94,7 @@ func (q *Queue) Pending() ([]*PendingAttestation, error) {
 	}
 	sort.Strings(names)
 
-	out := make([]*PendingAttestation, 0, len(names))
+	out := make([]*Attestation, 0, len(names))
 	for _, name := range names {
 		pa, err := q.load(name)
 		if err != nil {
@@ -152,7 +152,7 @@ func (q *Queue) Flush(ctx context.Context, sub Submitter) (submitted, failed int
 }
 
 // load reads and unmarshals a single queue file.
-func (q *Queue) load(name string) (*PendingAttestation, error) {
+func (q *Queue) load(name string) (*Attestation, error) {
 	path := filepath.Join(q.dir, name)
 	fi, err := os.Stat(path)
 	if err != nil {
@@ -165,7 +165,7 @@ func (q *Queue) load(name string) (*PendingAttestation, error) {
 	if err != nil {
 		return nil, err
 	}
-	var pa PendingAttestation
+	var pa Attestation
 	if err := json.Unmarshal(data, &pa); err != nil {
 		return nil, err
 	}

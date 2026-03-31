@@ -60,7 +60,7 @@ func fetchVersion(ctx context.Context, url string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("status %d", resp.StatusCode)
@@ -118,7 +118,7 @@ func semverLess(a, b string) bool {
 	if pa == nil || pb == nil {
 		return a != b && b > a // fallback to lexicographic
 	}
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		if pa[i] != pb[i] {
 			return pa[i] < pb[i]
 		}
