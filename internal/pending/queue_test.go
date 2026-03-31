@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/fwilkerson/sigil-cli/internal/pending"
-	"github.com/fwilkerson/sigil-cli/proto/trustclient"
+	"github.com/fwilkerson/sigil-cli/sigil/trustclient"
 )
 
 // makePA returns a PendingAttestation with realistic fields for testing.

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/fwilkerson/sigil-cli/proto/signing"
+	"github.com/fwilkerson/sigil-cli/sigil/signing"
 )
 
 func mustGenerateKeyPair(t *testing.T) *signing.KeyPair {

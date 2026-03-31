@@ -11,10 +11,10 @@ import (
 
 	"github.com/fwilkerson/sigil-cli/internal/pending"
 	"github.com/fwilkerson/sigil-cli/internal/trustsetup"
-	"github.com/fwilkerson/sigil-cli/proto/attest"
-	"github.com/fwilkerson/sigil-cli/proto/id"
-	"github.com/fwilkerson/sigil-cli/proto/identity"
-	"github.com/fwilkerson/sigil-cli/proto/toolattest"
+	"github.com/fwilkerson/sigil-cli/sigil/attest"
+	"github.com/fwilkerson/sigil-cli/sigil/id"
+	"github.com/fwilkerson/sigil-cli/sigil/identity"
+	"github.com/fwilkerson/sigil-cli/sigil/toolattest"
 )
 
 func newTrustAttestCmd() *cobra.Command {

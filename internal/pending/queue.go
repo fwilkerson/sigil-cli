@@ -15,7 +15,7 @@ import (
 
 	"github.com/oklog/ulid/v2"
 
-	"github.com/fwilkerson/sigil-cli/proto/trustclient"
+	"github.com/fwilkerson/sigil-cli/sigil/trustclient"
 )
 
 // PendingAttestation holds a signed attestation that could not be submitted.

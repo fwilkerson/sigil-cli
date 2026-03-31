@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/fwilkerson/sigil-cli/proto/attest"
+	"github.com/fwilkerson/sigil-cli/sigil/attest"
 )
 
 func TestValidateClaims_TooManyKeys(t *testing.T) {

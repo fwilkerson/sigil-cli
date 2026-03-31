@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/fwilkerson/sigil-cli/proto/attest"
-	"github.com/fwilkerson/sigil-cli/proto/id"
-	"github.com/fwilkerson/sigil-cli/proto/identity"
-	"github.com/fwilkerson/sigil-cli/proto/signing"
-	"github.com/fwilkerson/sigil-cli/proto/toolattest"
+	"github.com/fwilkerson/sigil-cli/sigil/attest"
+	"github.com/fwilkerson/sigil-cli/sigil/id"
+	"github.com/fwilkerson/sigil-cli/sigil/identity"
+	"github.com/fwilkerson/sigil-cli/sigil/signing"
+	"github.com/fwilkerson/sigil-cli/sigil/toolattest"
 )
 
 // TrustQuerier abstracts the trust service backend. Implementations may use

@@ -6,7 +6,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/fwilkerson/sigil-cli/proto/identity"
+	"github.com/fwilkerson/sigil-cli/sigil/identity"
 )
 
 func TestCompositeResolver_DidKey(t *testing.T) {

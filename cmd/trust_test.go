@@ -9,8 +9,8 @@ import (
 
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/fwilkerson/sigil-cli/proto/id"
-	"github.com/fwilkerson/sigil-cli/proto/toolattest"
+	"github.com/fwilkerson/sigil-cli/sigil/id"
+	"github.com/fwilkerson/sigil-cli/sigil/toolattest"
 	trustpb "github.com/fwilkerson/sigil-cli/api/trust/v1"
 )
 

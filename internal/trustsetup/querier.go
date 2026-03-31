@@ -6,7 +6,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/fwilkerson/sigil-cli/proto/trustclient"
+	"github.com/fwilkerson/sigil-cli/sigil/trustclient"
 	trustpb "github.com/fwilkerson/sigil-cli/api/trust/v1"
 )
 

@@ -10,8 +10,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/fwilkerson/sigil-cli/proto/identity"
-	"github.com/fwilkerson/sigil-cli/proto/signing"
+	"github.com/fwilkerson/sigil-cli/sigil/identity"
+	"github.com/fwilkerson/sigil-cli/sigil/signing"
 )
 
 // ErrInvalidSignature is returned when signature verification fails.

@@ -7,7 +7,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/fwilkerson/sigil-cli/proto/identity"
+	"github.com/fwilkerson/sigil-cli/sigil/identity"
 )
 
 // base58Encode is a test-local helper that mirrors the internal encoding used

@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/fwilkerson/sigil-cli/internal/scorecache"
-	"github.com/fwilkerson/sigil-cli/proto/trustclient"
+	"github.com/fwilkerson/sigil-cli/sigil/trustclient"
 )
 
 func newTrustCheckCmd() *cobra.Command {

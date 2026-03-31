@@ -6,7 +6,7 @@ package attesttest
 import (
 	"testing"
 
-	"github.com/fwilkerson/sigil-cli/proto/attest"
+	"github.com/fwilkerson/sigil-cli/sigil/attest"
 )
 
 // AssertDeterministicPayload verifies a Sealable implementation produces

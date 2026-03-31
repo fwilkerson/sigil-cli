@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fwilkerson/sigil-cli/proto/id"
+	"github.com/fwilkerson/sigil-cli/sigil/id"
 )
 
 func TestID_RoundTrip(t *testing.T) {

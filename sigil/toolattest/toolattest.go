@@ -14,9 +14,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fwilkerson/sigil-cli/proto/attest"
-	"github.com/fwilkerson/sigil-cli/proto/id"
-	"github.com/fwilkerson/sigil-cli/proto/identity"
+	"github.com/fwilkerson/sigil-cli/sigil/attest"
+	"github.com/fwilkerson/sigil-cli/sigil/id"
+	"github.com/fwilkerson/sigil-cli/sigil/identity"
 )
 
 // Outcome is the binary result of a tool interaction.

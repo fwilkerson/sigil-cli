@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/fwilkerson/sigil-cli/internal/fsutil"
-	"github.com/fwilkerson/sigil-cli/proto/identity"
-	"github.com/fwilkerson/sigil-cli/proto/signing"
+	"github.com/fwilkerson/sigil-cli/sigil/identity"
+	"github.com/fwilkerson/sigil-cli/sigil/signing"
 )
 
 const autoIdentityName = "auto"

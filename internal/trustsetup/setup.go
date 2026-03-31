@@ -5,8 +5,8 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/fwilkerson/sigil-cli/proto/identity"
-	"github.com/fwilkerson/sigil-cli/proto/signing"
+	"github.com/fwilkerson/sigil-cli/sigil/identity"
+	"github.com/fwilkerson/sigil-cli/sigil/signing"
 )
 
 // TrustSetup holds the identity, gRPC connection, and config for trust commands.

@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/fwilkerson/sigil-cli/proto/id"
-	"github.com/fwilkerson/sigil-cli/proto/identity"
+	"github.com/fwilkerson/sigil-cli/sigil/id"
+	"github.com/fwilkerson/sigil-cli/sigil/identity"
 )
 
 // Sentinel errors returned by Store implementations.

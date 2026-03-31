@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fwilkerson/sigil-cli/proto/id"
-	"github.com/fwilkerson/sigil-cli/proto/identity"
-	"github.com/fwilkerson/sigil-cli/proto/signing"
-	"github.com/fwilkerson/sigil-cli/proto/toolattest"
+	"github.com/fwilkerson/sigil-cli/sigil/id"
+	"github.com/fwilkerson/sigil-cli/sigil/identity"
+	"github.com/fwilkerson/sigil-cli/sigil/signing"
+	"github.com/fwilkerson/sigil-cli/sigil/toolattest"
 )
 
 // helpers
