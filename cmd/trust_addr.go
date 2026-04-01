@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/fwilkerson/sigil-cli/internal/buildinfo"
+	"github.com/fwilkerson/sigil-cli/cmd/buildinfo"
 )
 
 func registerTrustAddrFlag(_ *cobra.Command) {
