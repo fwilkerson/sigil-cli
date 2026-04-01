@@ -1,4 +1,4 @@
-package trustclient
+package trust
 
 import "testing"
 

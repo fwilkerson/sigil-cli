@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fwilkerson/sigil-cli/internal/scorecache"
+	"github.com/fwilkerson/sigil-cli/sigil/local/scorecache"
 )
 
 func newTestCache(t *testing.T) *scorecache.Cache {

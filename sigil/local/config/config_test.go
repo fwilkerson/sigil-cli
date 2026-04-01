@@ -1,17 +1,17 @@
-package trustsetup_test
+package config_test
 
 import (
 	"os"
 	"testing"
 
-	"github.com/fwilkerson/sigil-cli/internal/trustsetup"
+	"github.com/fwilkerson/sigil-cli/sigil/local/config"
 )
 
-func TestLoadConfig_Default(t *testing.T) {
+func TestLoad_Default(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
 
-	cfg, err := trustsetup.LoadConfig(dir)
+	cfg, err := config.Load(dir)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -20,17 +20,17 @@ func TestLoadConfig_Default(t *testing.T) {
 	}
 }
 
-func TestLoadConfig_Roundtrip(t *testing.T) {
+func TestLoad_Roundtrip(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
 
 	aa := false
-	cfg := &trustsetup.Config{AutoAttest: &aa}
-	if err := trustsetup.SaveConfig(dir, cfg); err != nil {
+	cfg := &config.Config{AutoAttest: &aa}
+	if err := config.Save(dir, cfg); err != nil {
 		t.Fatal(err)
 	}
 
-	loaded, err := trustsetup.LoadConfig(dir)
+	loaded, err := config.Load(dir)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -41,7 +41,7 @@ func TestLoadConfig_Roundtrip(t *testing.T) {
 
 func TestAutoAttestEnabled_Default(t *testing.T) {
 	t.Parallel()
-	cfg := &trustsetup.Config{}
+	cfg := &config.Config{}
 	if !cfg.AutoAttestEnabled() {
 		t.Error("expected true when AutoAttest is nil")
 	}
@@ -51,22 +51,22 @@ func TestAutoAttestEnabled_Explicit(t *testing.T) {
 	t.Parallel()
 
 	aa := true
-	cfg := &trustsetup.Config{AutoAttest: &aa}
+	cfg := &config.Config{AutoAttest: &aa}
 	if !cfg.AutoAttestEnabled() {
 		t.Error("expected true when explicitly set")
 	}
 
 	aa = false
-	cfg = &trustsetup.Config{AutoAttest: &aa}
+	cfg = &config.Config{AutoAttest: &aa}
 	if cfg.AutoAttestEnabled() {
 		t.Error("expected false when explicitly set")
 	}
 }
 
-func TestConfigDir_XDG(t *testing.T) {
+func TestDir_XDG(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", "/tmp/xdg")
 
-	dir, err := trustsetup.ConfigDir()
+	dir, err := config.Dir()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -75,10 +75,10 @@ func TestConfigDir_XDG(t *testing.T) {
 	}
 }
 
-func TestConfigDir_Fallback(t *testing.T) {
+func TestDir_Fallback(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", "")
 
-	dir, err := trustsetup.ConfigDir()
+	dir, err := config.Dir()
 	if err != nil {
 		t.Fatal(err)
 	}

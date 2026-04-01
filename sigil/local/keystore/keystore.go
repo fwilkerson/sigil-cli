@@ -1,4 +1,6 @@
-package trustsetup
+// Package keystore manages the on-disk identity (DID + key pair) for the
+// sigil CLI.
+package keystore
 
 import (
 	"crypto/ed25519"
@@ -8,8 +10,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/fwilkerson/sigil-cli/internal/fsutil"
 	"github.com/fwilkerson/sigil-cli/sigil/identity"
+	"github.com/fwilkerson/sigil-cli/sigil/local/fsutil"
 	"github.com/fwilkerson/sigil-cli/sigil/signing"
 )
 

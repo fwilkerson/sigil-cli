@@ -28,7 +28,7 @@ func New(configDir string) *Cache {
 // CachedScore holds the fields of a trust check result alongside the time the
 // entry was written. The Recommendation field is stored as a plain string so
 // that the struct round-trips cleanly through JSON without importing the
-// trustclient package.
+// trust client package.
 type CachedScore struct {
 	ToolURI          string    `json:"tool_uri"`
 	Score            float64   `json:"score"`

@@ -1,8 +1,8 @@
-// Package trustclient provides trust-check and attestation logic for agent
+// Package trust provides trust-check and attestation logic for agent
 // integrations. It contains the domain logic — recommendation thresholds,
 // parameter shape extraction, and session rate limiting — while delegating
-// I/O to a [TrustQuerier] interface that callers implement.
-package trustclient
+// I/O to a [sigiltrust.Querier] interface that callers implement.
+package trust
 
 // Recommendation is the agent-facing trust verdict for a tool.
 type Recommendation string

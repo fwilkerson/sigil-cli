@@ -1,6 +1,5 @@
-// Package trustsetup manages identity, configuration, and gRPC connectivity
-// for the trust service CLI commands.
-package trustsetup
+// Package config manages the sigil CLI configuration file.
+package config
 
 import (
 	"encoding/json"
@@ -8,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/fwilkerson/sigil-cli/internal/fsutil"
+	"github.com/fwilkerson/sigil-cli/sigil/local/fsutil"
 )
 
 // Config holds the trust CLI configuration.
@@ -27,9 +26,9 @@ func (c *Config) AutoAttestEnabled() bool {
 	return *c.AutoAttest
 }
 
-// ConfigDir returns the sigil config directory.
+// Dir returns the sigil config directory.
 // Uses $XDG_CONFIG_HOME/sigil or ~/.config/sigil as fallback.
-func ConfigDir() (string, error) {
+func Dir() (string, error) {
 	if xdg := os.Getenv("XDG_CONFIG_HOME"); xdg != "" {
 		return filepath.Join(xdg, "sigil"), nil
 	}
@@ -40,15 +39,15 @@ func ConfigDir() (string, error) {
 	return filepath.Join(home, ".config", "sigil"), nil
 }
 
-// ConfigPath returns the path to the config file within the config directory.
-func ConfigPath(configDir string) string {
+// Path returns the path to the config file within the config directory.
+func Path(configDir string) string {
 	return filepath.Join(configDir, "skill.json")
 }
 
-// LoadConfig reads the config from disk. Returns a default config if the file
+// Load reads the config from disk. Returns a default config if the file
 // does not exist.
-func LoadConfig(configDir string) (*Config, error) {
-	data, err := os.ReadFile(ConfigPath(configDir))
+func Load(configDir string) (*Config, error) {
+	data, err := os.ReadFile(Path(configDir))
 	if os.IsNotExist(err) {
 		return &Config{}, nil
 	}
@@ -62,8 +61,8 @@ func LoadConfig(configDir string) (*Config, error) {
 	return &cfg, nil
 }
 
-// SaveConfig writes the config to disk.
-func SaveConfig(configDir string, cfg *Config) error {
+// Save writes the config to disk.
+func Save(configDir string, cfg *Config) error {
 	if err := os.MkdirAll(configDir, 0o700); err != nil {
 		return fmt.Errorf("create config dir: %w", err)
 	}
@@ -71,5 +70,5 @@ func SaveConfig(configDir string, cfg *Config) error {
 	if err != nil {
 		return fmt.Errorf("marshal config: %w", err)
 	}
-	return fsutil.WriteFileAtomic(ConfigPath(configDir), data, 0o600)
+	return fsutil.WriteFileAtomic(Path(configDir), data, 0o600)
 }

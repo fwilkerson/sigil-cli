@@ -7,21 +7,21 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	trustpb "github.com/fwilkerson/sigil-cli/api/trust/v1"
-	"github.com/fwilkerson/sigil-cli/sigil/trustclient"
+	sigiltrust "github.com/fwilkerson/sigil-cli/sigil/trust"
 )
 
-// Querier implements [trustclient.TrustQuerier] via gRPC.
+// Querier implements [sigiltrust.Querier] via gRPC.
 type Querier struct {
 	client trustpb.TrustServiceClient
 }
 
-// NewQuerier returns a [trustclient.TrustQuerier] backed by conn.
+// NewQuerier returns a [sigiltrust.Querier] backed by conn.
 func NewQuerier(conn *googlegrpc.ClientConn) *Querier {
 	return &Querier{client: trustpb.NewTrustServiceClient(conn)}
 }
 
-// GetToolTrust implements [trustclient.TrustQuerier].
-func (q *Querier) GetToolTrust(ctx context.Context, toolURI string) (*trustclient.ToolTrustResult, error) {
+// GetToolTrust implements [sigiltrust.Querier].
+func (q *Querier) GetToolTrust(ctx context.Context, toolURI string) (*sigiltrust.ToolTrustResult, error) {
 	resp, err := q.client.GetToolTrust(ctx, &trustpb.GetToolTrustRequest{
 		ToolUri: toolURI,
 	})
@@ -29,7 +29,7 @@ func (q *Querier) GetToolTrust(ctx context.Context, toolURI string) (*trustclien
 		return nil, err
 	}
 
-	result := &trustclient.ToolTrustResult{
+	result := &sigiltrust.ToolTrustResult{
 		Score:             resp.Score,
 		TotalAttestations: int(resp.TotalAttestations),
 		UniqueAttesters:   int(resp.UniqueAttesters),
@@ -47,8 +47,8 @@ func (q *Querier) GetToolTrust(ctx context.Context, toolURI string) (*trustclien
 	return result, nil
 }
 
-// SubmitAttestation implements [trustclient.TrustQuerier].
-func (q *Querier) SubmitAttestation(ctx context.Context, req *trustclient.AttestationSubmission) (*trustclient.SubmitResult, error) {
+// SubmitAttestation implements [sigiltrust.Querier].
+func (q *Querier) SubmitAttestation(ctx context.Context, req *sigiltrust.AttestationSubmission) (*sigiltrust.SubmitResult, error) {
 	resp, err := q.client.SubmitAttestation(ctx, &trustpb.SubmitAttestationRequest{
 		AttestationId: req.AttestationID,
 		AttesterDid:   req.AttesterDID,
@@ -62,13 +62,13 @@ func (q *Querier) SubmitAttestation(ctx context.Context, req *trustclient.Attest
 	if err != nil {
 		return nil, err
 	}
-	return &trustclient.SubmitResult{
+	return &sigiltrust.SubmitResult{
 		AttestationID: resp.AttestationId,
 		Deduplicated:  resp.Deduplicated,
 	}, nil
 }
 
-// RetractAttestation implements [trustclient.TrustQuerier].
+// RetractAttestation implements [sigiltrust.Querier].
 func (q *Querier) RetractAttestation(ctx context.Context, attestationID, attesterDID string, signature []byte) error {
 	_, err := q.client.RetractAttestation(ctx, &trustpb.RetractAttestationRequest{
 		AttestationId: attestationID,
@@ -79,4 +79,4 @@ func (q *Querier) RetractAttestation(ctx context.Context, attestationID, atteste
 }
 
 // Compile-time check.
-var _ trustclient.TrustQuerier = (*Querier)(nil)
+var _ sigiltrust.Querier = (*Querier)(nil)

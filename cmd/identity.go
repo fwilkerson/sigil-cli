@@ -9,7 +9,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/fwilkerson/sigil-cli/internal/trustsetup"
+	"github.com/fwilkerson/sigil-cli/sigil/local/keystore"
 )
 
 func newIdentityCmd() *cobra.Command {
@@ -27,7 +27,7 @@ func newIdentityShowCmd() *cobra.Command {
 		Short: "Show your Sigil identity",
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			dir := configDirFrom(cmd)
-			meta, err := trustsetup.LoadIdentityMeta(dir)
+			meta, err := keystore.LoadIdentityMeta(dir)
 			if err != nil {
 				if errors.Is(err, os.ErrNotExist) {
 					cmd.Println("No identity yet. One will be created on your first attestation.")
@@ -48,14 +48,14 @@ func newIdentityExportCmd() *cobra.Command {
 		Short: "Export public identity as JSON",
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			dir := configDirFrom(cmd)
-			kp, _, err := trustsetup.LoadIdentity(dir)
+			kp, _, err := keystore.LoadIdentity(dir)
 			if err != nil {
 				if errors.Is(err, os.ErrNotExist) {
 					return fmt.Errorf("no identity exists yet — run an attestation first to create one")
 				}
 				return err
 			}
-			meta, err := trustsetup.LoadIdentityMeta(dir)
+			meta, err := keystore.LoadIdentityMeta(dir)
 			if err != nil {
 				return fmt.Errorf("load identity metadata: %w", err)
 			}

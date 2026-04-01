@@ -9,8 +9,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/fwilkerson/sigil-cli/internal/buildinfo"
-	"github.com/fwilkerson/sigil-cli/internal/trustsetup"
 	"github.com/fwilkerson/sigil-cli/internal/versioncheck"
+	"github.com/fwilkerson/sigil-cli/sigil/local/config"
 )
 
 // addDevCommands registers dev-only commands on the root. Overridden by
@@ -47,7 +47,7 @@ Quick start:
 		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
 			dir := configDir
 			if dir == "" {
-				d, err := trustsetup.ConfigDir()
+				d, err := config.Dir()
 				if err != nil {
 					return fmt.Errorf("resolve config dir: %w", err)
 				}

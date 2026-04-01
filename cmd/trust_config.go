@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/fwilkerson/sigil-cli/internal/trustsetup"
+	"github.com/fwilkerson/sigil-cli/sigil/local/config"
 )
 
 func newTrustConfigCmd() *cobra.Command {
@@ -25,7 +25,7 @@ func newTrustConfigGetCmd() *cobra.Command {
 		Long:  "Supported keys: auto-attest",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cfg, err := trustsetup.LoadConfig(configDirFrom(cmd))
+			cfg, err := config.Load(configDirFrom(cmd))
 			if err != nil {
 				return err
 			}
@@ -48,7 +48,7 @@ func newTrustConfigSetCmd() *cobra.Command {
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			dir := configDirFrom(cmd)
-			cfg, err := trustsetup.LoadConfig(dir)
+			cfg, err := config.Load(dir)
 			if err != nil {
 				return err
 			}
@@ -68,7 +68,7 @@ func newTrustConfigSetCmd() *cobra.Command {
 			default:
 				return fmt.Errorf("unknown config key: %q", args[0])
 			}
-			if err := trustsetup.SaveConfig(dir, cfg); err != nil {
+			if err := config.Save(dir, cfg); err != nil {
 				return err
 			}
 			cmd.Printf("%s = %s\n", args[0], args[1])

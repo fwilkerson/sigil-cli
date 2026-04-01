@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/fwilkerson/sigil-cli/internal/trustsetup"
+	"github.com/fwilkerson/sigil-cli/sigil/local/keystore"
 )
 
 func TestIdentityShow_NoIdentity(t *testing.T) {
@@ -25,7 +25,7 @@ func TestIdentityShow_NoIdentity(t *testing.T) {
 func TestIdentityShow_WithIdentity(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
-	_, did, _, err := trustsetup.EnsureIdentity(dir)
+	_, did, _, err := keystore.EnsureIdentity(dir)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -55,7 +55,7 @@ func TestIdentityExport_NoIdentity(t *testing.T) {
 func TestIdentityExport_WithIdentity(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
-	_, _, _, err := trustsetup.EnsureIdentity(dir)
+	_, _, _, err := keystore.EnsureIdentity(dir)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -88,7 +88,7 @@ func TestIdentityExport_WithIdentity(t *testing.T) {
 func TestIdentityExport_JSONValid(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
-	_, _, _, err := trustsetup.EnsureIdentity(dir)
+	_, _, _, err := keystore.EnsureIdentity(dir)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/fwilkerson/sigil-cli/sigil/trustclient"
+	localtrust "github.com/fwilkerson/sigil-cli/sigil/local/trust"
 )
 
 func newTestCheckCmd() *cobra.Command {
@@ -24,10 +24,10 @@ func TestPrintCheckHuman_WithData(t *testing.T) {
 	buf := new(bytes.Buffer)
 	cmd.SetOut(buf)
 
-	r := &trustclient.CheckResult{
+	r := &localtrust.CheckResult{
 		ToolURI:          "mcp://example.com/tool",
 		Score:            0.85,
-		Recommendation:   trustclient.RecommendUse,
+		Recommendation:   localtrust.RecommendUse,
 		Label:            "well-trusted",
 		HasData:          true,
 		Attestations:     150,
@@ -60,10 +60,10 @@ func TestPrintCheckHuman_NoData(t *testing.T) {
 	buf := new(bytes.Buffer)
 	cmd.SetOut(buf)
 
-	r := &trustclient.CheckResult{
+	r := &localtrust.CheckResult{
 		ToolURI:        "mcp://example.com/unknown-tool",
 		Score:          0,
-		Recommendation: trustclient.RecommendUnknown,
+		Recommendation: localtrust.RecommendUnknown,
 		Label:          "unknown — no attestations yet",
 		HasData:        false,
 	}
@@ -84,10 +84,10 @@ func TestPrintCheckJSON_WithData(t *testing.T) {
 	buf := new(bytes.Buffer)
 	cmd.SetOut(buf)
 
-	r := &trustclient.CheckResult{
+	r := &localtrust.CheckResult{
 		ToolURI:          "mcp://example.com/tool",
 		Score:            0.72,
-		Recommendation:   trustclient.RecommendUse,
+		Recommendation:   localtrust.RecommendUse,
 		Label:            "well-trusted",
 		HasData:          true,
 		Attestations:     80,
@@ -121,9 +121,9 @@ func TestPrintCheckJSON_NoData(t *testing.T) {
 	buf := new(bytes.Buffer)
 	cmd.SetOut(buf)
 
-	r := &trustclient.CheckResult{
+	r := &localtrust.CheckResult{
 		ToolURI:        "mcp://example.com/unknown",
-		Recommendation: trustclient.RecommendUnknown,
+		Recommendation: localtrust.RecommendUnknown,
 		Label:          "unknown — no attestations yet",
 		HasData:        false,
 	}

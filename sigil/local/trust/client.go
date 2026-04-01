@@ -1,4 +1,4 @@
-package trustclient
+package trust
 
 import (
 	"context"
@@ -10,51 +10,8 @@ import (
 	"github.com/fwilkerson/sigil-cli/sigil/id"
 	"github.com/fwilkerson/sigil-cli/sigil/identity"
 	"github.com/fwilkerson/sigil-cli/sigil/signing"
+	sigiltrust "github.com/fwilkerson/sigil-cli/sigil/trust"
 )
-
-// TrustQuerier abstracts the trust service backend. Implementations may use
-// gRPC, the CLI, or an in-memory stub for testing.
-type TrustQuerier interface {
-	// GetToolTrust returns the trust digest for a tool URI.
-	GetToolTrust(ctx context.Context, toolURI string) (*ToolTrustResult, error)
-
-	// SubmitAttestation submits a signed attestation and returns the result.
-	SubmitAttestation(ctx context.Context, req *AttestationSubmission) (*SubmitResult, error)
-
-	// RetractAttestation soft-deletes an attestation with a signed deletion proof.
-	RetractAttestation(ctx context.Context, attestationID, attesterDID string, signature []byte) error
-}
-
-// SubmitResult is the outcome of submitting an attestation.
-type SubmitResult struct {
-	AttestationID string
-	Deduplicated  bool
-}
-
-// ToolTrustResult is the response from a trust query.
-type ToolTrustResult struct {
-	Score             float64
-	TotalAttestations int
-	UniqueAttesters   int
-	SuccessRate       float64
-	Provisional       bool
-	FirstSeen         time.Time
-	LastActive        time.Time
-	VersionsAttested  int
-	LatestVersion     string
-}
-
-// AttestationSubmission carries a signed attestation to the backend.
-type AttestationSubmission struct {
-	AttestationID string
-	AttesterDID   string
-	ToolURI       string
-	Outcome       string
-	Claims        map[string]string
-	Version       string
-	Signature     []byte
-	IssuedAt      time.Time
-}
 
 // CheckResult is the outcome of a trust check for a tool.
 type CheckResult struct {
@@ -71,15 +28,15 @@ type CheckResult struct {
 	LatestVersion    string
 }
 
-// Client wraps a [TrustQuerier] with recommendation logic and rate limiting.
+// Client wraps a [sigiltrust.Querier] with recommendation logic and rate limiting.
 type Client struct {
-	querier TrustQuerier
+	querier sigiltrust.Querier
 	limiter *SessionLimiter
 }
 
 // NewClient creates a trust client with the given backend and a default
 // session limiter (once per tool per session).
-func NewClient(q TrustQuerier) *Client {
+func NewClient(q sigiltrust.Querier) *Client {
 	return &Client{
 		querier: q,
 		limiter: NewSessionLimiter(0),
@@ -87,7 +44,7 @@ func NewClient(q TrustQuerier) *Client {
 }
 
 // NewClientWithLimiter creates a trust client with a custom rate limiter.
-func NewClientWithLimiter(q TrustQuerier, limiter *SessionLimiter) *Client {
+func NewClientWithLimiter(q sigiltrust.Querier, limiter *SessionLimiter) *Client {
 	return &Client{
 		querier: q,
 		limiter: limiter,
@@ -127,7 +84,7 @@ func (c *Client) Check(ctx context.Context, toolURI string) (*CheckResult, error
 // It returns nil result if rate-limited (silently skipped). Positive
 // attestations include only the tool ID, outcome, and version — no params,
 // no agent_runtime.
-func (c *Client) AttestPositive(ctx context.Context, toolURI, version string, kp *signing.KeyPair) (*SubmitResult, error) {
+func (c *Client) AttestPositive(ctx context.Context, toolURI, version string, kp *signing.KeyPair) (*sigiltrust.SubmitResult, error) {
 	if !c.limiter.Allow(toolURI) {
 		return nil, nil // silently skip
 	}
@@ -192,7 +149,7 @@ func (c *Client) PrepareNegative(toolURI, version string, claims map[string]stri
 // SubmitPrepared signs and submits a previously prepared attestation.
 // Use this after the user has reviewed and confirmed a negative attestation
 // from [Client.PrepareNegative].
-func (c *Client) SubmitPrepared(ctx context.Context, ta *attest.ToolAttestation, kp *signing.KeyPair) (*SubmitResult, error) {
+func (c *Client) SubmitPrepared(ctx context.Context, ta *attest.ToolAttestation, kp *signing.KeyPair) (*sigiltrust.SubmitResult, error) {
 	if err := attest.Seal(ta, kp); err != nil {
 		return nil, fmt.Errorf("seal attestation: %w", err)
 	}
@@ -209,7 +166,7 @@ func (c *Client) Limiter() *SessionLimiter { return c.limiter }
 // or re-sealing it. Use this when the caller has already called [attest.Seal]
 // (e.g. to preserve the signed data for offline queuing) and only needs to
 // transmit the result.
-func (c *Client) SubmitSealed(ctx context.Context, ta *attest.ToolAttestation) (*SubmitResult, error) {
+func (c *Client) SubmitSealed(ctx context.Context, ta *attest.ToolAttestation) (*sigiltrust.SubmitResult, error) {
 	return c.submitAttestation(ctx, ta)
 }
 
@@ -235,8 +192,8 @@ func (c *Client) Retract(ctx context.Context, attestationID string, attesterDID 
 }
 
 // submitAttestation converts a ToolAttestation to a submission and sends it.
-func (c *Client) submitAttestation(ctx context.Context, ta *attest.ToolAttestation) (*SubmitResult, error) {
-	sub := &AttestationSubmission{
+func (c *Client) submitAttestation(ctx context.Context, ta *attest.ToolAttestation) (*sigiltrust.SubmitResult, error) {
+	sub := &sigiltrust.AttestationSubmission{
 		AttestationID: ta.ID.String(),
 		AttesterDID:   string(ta.Attester),
 		ToolURI:       ta.Tool.String(),

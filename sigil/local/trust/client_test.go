@@ -1,4 +1,4 @@
-package trustclient
+package trust
 
 import (
 	"context"
@@ -8,19 +8,20 @@ import (
 
 	"github.com/fwilkerson/sigil-cli/sigil/identity"
 	"github.com/fwilkerson/sigil-cli/sigil/signing"
+	sigiltrust "github.com/fwilkerson/sigil-cli/sigil/trust"
 )
 
-// mockQuerier is a test double for TrustQuerier.
+// mockQuerier is a test double for trust.Querier.
 type mockQuerier struct {
-	trustResult *ToolTrustResult
+	trustResult *sigiltrust.ToolTrustResult
 	trustErr    error
 	submitID    string
 	submitDedup bool
 	submitErr   error
-	submissions []*AttestationSubmission
+	submissions []*sigiltrust.AttestationSubmission
 }
 
-func (m *mockQuerier) GetToolTrust(_ context.Context, _ string) (*ToolTrustResult, error) {
+func (m *mockQuerier) GetToolTrust(_ context.Context, _ string) (*sigiltrust.ToolTrustResult, error) {
 	return m.trustResult, m.trustErr
 }
 
@@ -32,17 +33,17 @@ func (m *mockQuerier) RetractAttestation(_ context.Context, attestationID, _ str
 	return nil
 }
 
-func (m *mockQuerier) SubmitAttestation(_ context.Context, req *AttestationSubmission) (*SubmitResult, error) {
+func (m *mockQuerier) SubmitAttestation(_ context.Context, req *sigiltrust.AttestationSubmission) (*sigiltrust.SubmitResult, error) {
 	m.submissions = append(m.submissions, req)
 	if m.submitErr != nil {
 		return nil, m.submitErr
 	}
-	return &SubmitResult{AttestationID: m.submitID, Deduplicated: m.submitDedup}, nil
+	return &sigiltrust.SubmitResult{AttestationID: m.submitID, Deduplicated: m.submitDedup}, nil
 }
 
 func TestClient_Check(t *testing.T) {
 	q := &mockQuerier{
-		trustResult: &ToolTrustResult{
+		trustResult: &sigiltrust.ToolTrustResult{
 			Score:             0.85,
 			TotalAttestations: 50,
 			UniqueAttesters:   20,
@@ -69,7 +70,7 @@ func TestClient_Check(t *testing.T) {
 
 func TestClient_Check_WithVersions(t *testing.T) {
 	q := &mockQuerier{
-		trustResult: &ToolTrustResult{
+		trustResult: &sigiltrust.ToolTrustResult{
 			Score:             0.85,
 			TotalAttestations: 50,
 			UniqueAttesters:   20,
@@ -95,7 +96,7 @@ func TestClient_Check_WithVersions(t *testing.T) {
 
 func TestClient_Check_Unknown(t *testing.T) {
 	q := &mockQuerier{
-		trustResult: &ToolTrustResult{
+		trustResult: &sigiltrust.ToolTrustResult{
 			Score:             0,
 			TotalAttestations: 0,
 		},

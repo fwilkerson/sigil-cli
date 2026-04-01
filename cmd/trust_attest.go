@@ -9,11 +9,11 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/fwilkerson/sigil-cli/internal/pending"
-	"github.com/fwilkerson/sigil-cli/internal/trustsetup"
 	"github.com/fwilkerson/sigil-cli/sigil/attest"
 	"github.com/fwilkerson/sigil-cli/sigil/id"
 	"github.com/fwilkerson/sigil-cli/sigil/identity"
+	"github.com/fwilkerson/sigil-cli/sigil/local/config"
+	"github.com/fwilkerson/sigil-cli/sigil/local/pending"
 )
 
 func newTrustAttestCmd() *cobra.Command {
@@ -52,7 +52,7 @@ Always pass --version when available for the best signal.`,
 			o := attest.Outcome(outcome)
 			switch o {
 			case attest.OutcomeSuccess:
-				cfg, err := trustsetup.LoadConfig(configDirFrom(cmd))
+				cfg, err := config.Load(configDirFrom(cmd))
 				if err != nil {
 					return err
 				}

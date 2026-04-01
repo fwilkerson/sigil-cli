@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fwilkerson/sigil-cli/internal/pending"
-	"github.com/fwilkerson/sigil-cli/sigil/trustclient"
+	"github.com/fwilkerson/sigil-cli/sigil/local/pending"
+	sigiltrust "github.com/fwilkerson/sigil-cli/sigil/trust"
 )
 
 // makePA returns a Attestation with realistic fields for testing.
@@ -29,28 +29,28 @@ func makePA(toolURI, outcome string) *pending.Attestation {
 // okSubmitter accepts all submissions.
 type okSubmitter struct{ count int }
 
-func (s *okSubmitter) SubmitAttestation(_ context.Context, _ *trustclient.AttestationSubmission) (*trustclient.SubmitResult, error) {
+func (s *okSubmitter) SubmitAttestation(_ context.Context, _ *sigiltrust.AttestationSubmission) (*sigiltrust.SubmitResult, error) {
 	s.count++
-	return &trustclient.SubmitResult{AttestationID: "submitted-id"}, nil
+	return &sigiltrust.SubmitResult{AttestationID: "submitted-id"}, nil
 }
 
 // failSubmitter rejects all submissions.
 type failSubmitter struct{}
 
-func (s *failSubmitter) SubmitAttestation(_ context.Context, _ *trustclient.AttestationSubmission) (*trustclient.SubmitResult, error) {
+func (s *failSubmitter) SubmitAttestation(_ context.Context, _ *sigiltrust.AttestationSubmission) (*sigiltrust.SubmitResult, error) {
 	return nil, errors.New("connection refused")
 }
 
 // partialSubmitter fails on odd-indexed calls (0-based).
 type partialSubmitter struct{ call int }
 
-func (s *partialSubmitter) SubmitAttestation(_ context.Context, _ *trustclient.AttestationSubmission) (*trustclient.SubmitResult, error) {
+func (s *partialSubmitter) SubmitAttestation(_ context.Context, _ *sigiltrust.AttestationSubmission) (*sigiltrust.SubmitResult, error) {
 	i := s.call
 	s.call++
 	if i%2 == 1 {
 		return nil, errors.New("transient error")
 	}
-	return &trustclient.SubmitResult{AttestationID: "ok"}, nil
+	return &sigiltrust.SubmitResult{AttestationID: "ok"}, nil
 }
 
 func TestEnqueueThenPending(t *testing.T) {

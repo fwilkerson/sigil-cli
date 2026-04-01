@@ -2,10 +2,10 @@ package trustsetup
 
 import (
 	sigilgrpc "github.com/fwilkerson/sigil-cli/sigil/grpc"
-	"github.com/fwilkerson/sigil-cli/sigil/trustclient"
+	localtrust "github.com/fwilkerson/sigil-cli/sigil/local/trust"
 )
 
-// TrustClient returns a [trustclient.Client] backed by the gRPC connection.
-func (s *TrustSetup) TrustClient() *trustclient.Client {
-	return trustclient.NewClient(sigilgrpc.NewQuerier(s.Conn))
+// TrustClient returns a [localtrust.Client] backed by the gRPC connection.
+func (s *TrustSetup) TrustClient() *localtrust.Client {
+	return localtrust.NewClient(sigilgrpc.NewQuerier(s.Conn))
 }

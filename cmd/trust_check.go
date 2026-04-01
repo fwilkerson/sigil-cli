@@ -7,8 +7,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/fwilkerson/sigil-cli/internal/scorecache"
-	"github.com/fwilkerson/sigil-cli/sigil/trustclient"
+	"github.com/fwilkerson/sigil-cli/sigil/local/scorecache"
+	localtrust "github.com/fwilkerson/sigil-cli/sigil/local/trust"
 )
 
 func newTrustCheckCmd() *cobra.Command {
@@ -66,7 +66,7 @@ Agents should call this before invoking a tool to decide whether to proceed.`,
 	}
 }
 
-func printCheckJSON(cmd *cobra.Command, r *trustclient.CheckResult) error {
+func printCheckJSON(cmd *cobra.Command, r *localtrust.CheckResult) error {
 	out := map[string]any{
 		"tool":           r.ToolURI,
 		"score":          r.Score,
@@ -92,7 +92,7 @@ func printCheckJSON(cmd *cobra.Command, r *trustclient.CheckResult) error {
 	return nil
 }
 
-func printCheckHuman(cmd *cobra.Command, r *trustclient.CheckResult) {
+func printCheckHuman(cmd *cobra.Command, r *localtrust.CheckResult) {
 	cmd.Printf("Tool: %s\n", r.ToolURI)
 	cmd.Printf("Recommendation: %s\n", r.Recommendation)
 	cmd.Printf("Label: %s\n", r.Label)

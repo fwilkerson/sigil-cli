@@ -15,7 +15,7 @@ import (
 
 	"github.com/oklog/ulid/v2"
 
-	"github.com/fwilkerson/sigil-cli/sigil/trustclient"
+	sigiltrust "github.com/fwilkerson/sigil-cli/sigil/trust"
 )
 
 // Attestation holds a signed attestation that could not be submitted.
@@ -39,7 +39,7 @@ type Attestation struct {
 
 // Submitter can submit a signed attestation to the trust service.
 type Submitter interface {
-	SubmitAttestation(ctx context.Context, req *trustclient.AttestationSubmission) (*trustclient.SubmitResult, error)
+	SubmitAttestation(ctx context.Context, req *sigiltrust.AttestationSubmission) (*sigiltrust.SubmitResult, error)
 }
 
 // Queue is a file-based queue of pending attestations.
@@ -127,7 +127,7 @@ func (q *Queue) Flush(ctx context.Context, sub Submitter) (submitted, failed int
 	}
 
 	for _, pa := range pending {
-		req := &trustclient.AttestationSubmission{
+		req := &sigiltrust.AttestationSubmission{
 			AttestationID: pa.AttestationID,
 			AttesterDID:   pa.AttesterDID,
 			ToolURI:       pa.ToolURI,

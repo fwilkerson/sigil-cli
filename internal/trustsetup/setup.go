@@ -1,3 +1,5 @@
+// Package trustsetup manages gRPC connectivity and orchestration for the
+// trust service CLI commands.
 package trustsetup
 
 import (
@@ -7,6 +9,7 @@ import (
 
 	sigilgrpc "github.com/fwilkerson/sigil-cli/sigil/grpc"
 	"github.com/fwilkerson/sigil-cli/sigil/identity"
+	"github.com/fwilkerson/sigil-cli/sigil/local/config"
 	"github.com/fwilkerson/sigil-cli/sigil/signing"
 )
 
@@ -14,7 +17,7 @@ import (
 type TrustSetup struct {
 	KeyPair *signing.KeyPair
 	DID     identity.DID
-	Config  *Config
+	Config  *config.Config
 	Conn    *grpc.ClientConn
 }
 
