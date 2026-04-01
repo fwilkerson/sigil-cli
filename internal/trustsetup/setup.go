@@ -5,6 +5,7 @@ import (
 
 	"google.golang.org/grpc"
 
+	sigilgrpc "github.com/fwilkerson/sigil-cli/sigil/grpc"
 	"github.com/fwilkerson/sigil-cli/sigil/identity"
 	"github.com/fwilkerson/sigil-cli/sigil/signing"
 )
@@ -19,7 +20,7 @@ type TrustSetup struct {
 
 // Connect dials the trust service and returns a setup with the connection.
 func Connect(addr string) (*TrustSetup, error) {
-	conn, err := grpc.NewClient(addr, dialOpts()...)
+	conn, err := grpc.NewClient(addr, sigilgrpc.DialOpts()...)
 	if err != nil {
 		return nil, fmt.Errorf("connect to trust service: %w", err)
 	}

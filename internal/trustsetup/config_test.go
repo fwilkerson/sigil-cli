@@ -24,7 +24,8 @@ func TestLoadConfig_Roundtrip(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
 
-	cfg := &trustsetup.Config{AutoAttest: new(false)}
+	aa := false
+	cfg := &trustsetup.Config{AutoAttest: &aa}
 	if err := trustsetup.SaveConfig(dir, cfg); err != nil {
 		t.Fatal(err)
 	}
@@ -49,12 +50,14 @@ func TestAutoAttestEnabled_Default(t *testing.T) {
 func TestAutoAttestEnabled_Explicit(t *testing.T) {
 	t.Parallel()
 
-	cfg := &trustsetup.Config{AutoAttest: new(true)}
+	aa := true
+	cfg := &trustsetup.Config{AutoAttest: &aa}
 	if !cfg.AutoAttestEnabled() {
 		t.Error("expected true when explicitly set")
 	}
 
-	cfg = &trustsetup.Config{AutoAttest: new(false)}
+	aa = false
+	cfg = &trustsetup.Config{AutoAttest: &aa}
 	if cfg.AutoAttestEnabled() {
 		t.Error("expected false when explicitly set")
 	}

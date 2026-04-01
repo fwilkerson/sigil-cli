@@ -26,7 +26,7 @@ const (
 // Recommend returns a recommendation and human-readable label based on the
 // trust score, attestation count, and provisional flag.
 //
-// Threshold logic (from task 009 spec):
+// Threshold logic:
 //   - score >= 0.7 → "use" (well-trusted)
 //   - 0.3 <= score < 0.7 → "caution" (limited data or mixed reviews)
 //   - score < 0.3 → "avoid" (poorly trusted)
