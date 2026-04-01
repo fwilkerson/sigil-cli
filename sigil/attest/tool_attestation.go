@@ -1,11 +1,4 @@
-// Package toolattest provides the ToolAttestation type — a single-party
-// attestation where a user attests their experience with a tool. Unlike
-// party-to-party sigils, the tool does not participate in signing; the
-// attestation is unilateral.
-//
-// ToolAttestation implements [attest.Sealable] and uses [attest.Seal],
-// [attest.Verify], and [attest.VerifyWithResolver] for its signing lifecycle.
-package toolattest
+package attest
 
 import (
 	"encoding/json"
@@ -14,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fwilkerson/sigil-cli/sigil/attest"
 	"github.com/fwilkerson/sigil-cli/sigil/id"
 	"github.com/fwilkerson/sigil-cli/sigil/identity"
 )
@@ -51,7 +43,8 @@ const (
 )
 
 // ToolAttestation is a signed attestation from a user about a tool.
-// It implements [attest.Sealable].
+// It implements [Sealable]. Unlike party-to-party sigils, the tool does not
+// participate in signing; the attestation is unilateral.
 type ToolAttestation struct {
 	ID        id.ToolAttestationID `json:"id"`
 	Attester  identity.DID         `json:"attester"`
@@ -63,8 +56,8 @@ type ToolAttestation struct {
 	Signature []byte               `json:"signature"`
 }
 
-// payload is the versioned canonical representation for signing.
-type payload struct {
+// toolAttestPayload is the versioned canonical representation for signing.
+type toolAttestPayload struct {
 	V        int               `json:"v"`
 	ID       string            `json:"id"`
 	Attester string            `json:"attester"`
@@ -82,7 +75,7 @@ func (ta *ToolAttestation) SigningPayload() ([]byte, error) {
 	if claims == nil {
 		claims = map[string]string{}
 	}
-	p := payload{
+	p := toolAttestPayload{
 		V:        1,
 		ID:       ta.ID.String(),
 		Attester: ta.Attester.String(),
@@ -128,11 +121,11 @@ func (ta *ToolAttestation) Validate() error {
 	if ta.IssuedAt.IsZero() {
 		return errors.New("missing issued_at")
 	}
-	if err := attest.ValidateClaims(ta.Claims); err != nil {
+	if err := ValidateClaims(ta.Claims); err != nil {
 		return err
 	}
 	return nil
 }
 
-// Compile-time check that *ToolAttestation implements attest.Sealable.
-var _ attest.Sealable = (*ToolAttestation)(nil)
+// Compile-time check that *ToolAttestation implements Sealable.
+var _ Sealable = (*ToolAttestation)(nil)

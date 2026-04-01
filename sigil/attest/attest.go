@@ -18,7 +18,7 @@ import (
 var ErrInvalidSignature = errors.New("invalid signature")
 
 // Sealable is an attestation that can be signed (sealed) and verified.
-// Both [sigil.Sigil] and [toolattest.ToolAttestation] implement this interface.
+// Both [sigil.Sigil] and [ToolAttestation] implement this interface.
 type Sealable interface {
 	// Validate checks that all required fields are present and valid.
 	// Seal calls Validate before signing.

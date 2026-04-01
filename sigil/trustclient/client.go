@@ -10,7 +10,6 @@ import (
 	"github.com/fwilkerson/sigil-cli/sigil/id"
 	"github.com/fwilkerson/sigil-cli/sigil/identity"
 	"github.com/fwilkerson/sigil-cli/sigil/signing"
-	"github.com/fwilkerson/sigil-cli/sigil/toolattest"
 )
 
 // TrustQuerier abstracts the trust service backend. Implementations may use
@@ -141,11 +140,11 @@ func (c *Client) AttestPositive(ctx context.Context, toolURI, version string, kp
 	attesterDID := identity.DIDFromKey(kp.Public)
 	now := time.Now().UTC().Truncate(time.Second)
 
-	ta := &toolattest.ToolAttestation{
+	ta := &attest.ToolAttestation{
 		ID:       id.NewToolAttestationID(),
 		Attester: attesterDID,
 		Tool:     toolID,
-		Outcome:  toolattest.OutcomeSuccess,
+		Outcome:  attest.OutcomeSuccess,
 		Claims:   map[string]string{},
 		Version:  version,
 		IssuedAt: now,
@@ -162,7 +161,7 @@ func (c *Client) AttestPositive(ctx context.Context, toolURI, version string, kp
 // The caller MUST display the attestation to the user and obtain confirmation
 // before calling [Client.SubmitPrepared]. This two-step flow enforces the
 // mandatory pre-submission review for negative attestations.
-func (c *Client) PrepareNegative(toolURI, version string, claims map[string]string, kp *signing.KeyPair) (*toolattest.ToolAttestation, error) {
+func (c *Client) PrepareNegative(toolURI, version string, claims map[string]string, kp *signing.KeyPair) (*attest.ToolAttestation, error) {
 	toolID, err := id.NewToolID(toolURI)
 	if err != nil {
 		return nil, fmt.Errorf("invalid tool URI: %w", err)
@@ -171,11 +170,11 @@ func (c *Client) PrepareNegative(toolURI, version string, claims map[string]stri
 	attesterDID := identity.DIDFromKey(kp.Public)
 	now := time.Now().UTC().Truncate(time.Second)
 
-	ta := &toolattest.ToolAttestation{
+	ta := &attest.ToolAttestation{
 		ID:       id.NewToolAttestationID(),
 		Attester: attesterDID,
 		Tool:     toolID,
-		Outcome:  toolattest.OutcomeNegative,
+		Outcome:  attest.OutcomeNegative,
 		Claims:   claims,
 		Version:  version,
 		IssuedAt: now,
@@ -193,7 +192,7 @@ func (c *Client) PrepareNegative(toolURI, version string, claims map[string]stri
 // SubmitPrepared signs and submits a previously prepared attestation.
 // Use this after the user has reviewed and confirmed a negative attestation
 // from [Client.PrepareNegative].
-func (c *Client) SubmitPrepared(ctx context.Context, ta *toolattest.ToolAttestation, kp *signing.KeyPair) (*SubmitResult, error) {
+func (c *Client) SubmitPrepared(ctx context.Context, ta *attest.ToolAttestation, kp *signing.KeyPair) (*SubmitResult, error) {
 	if err := attest.Seal(ta, kp); err != nil {
 		return nil, fmt.Errorf("seal attestation: %w", err)
 	}
@@ -210,7 +209,7 @@ func (c *Client) Limiter() *SessionLimiter { return c.limiter }
 // or re-sealing it. Use this when the caller has already called [attest.Seal]
 // (e.g. to preserve the signed data for offline queuing) and only needs to
 // transmit the result.
-func (c *Client) SubmitSealed(ctx context.Context, ta *toolattest.ToolAttestation) (*SubmitResult, error) {
+func (c *Client) SubmitSealed(ctx context.Context, ta *attest.ToolAttestation) (*SubmitResult, error) {
 	return c.submitAttestation(ctx, ta)
 }
 
@@ -236,7 +235,7 @@ func (c *Client) Retract(ctx context.Context, attestationID string, attesterDID 
 }
 
 // submitAttestation converts a ToolAttestation to a submission and sends it.
-func (c *Client) submitAttestation(ctx context.Context, ta *toolattest.ToolAttestation) (*SubmitResult, error) {
+func (c *Client) submitAttestation(ctx context.Context, ta *attest.ToolAttestation) (*SubmitResult, error) {
 	sub := &AttestationSubmission{
 		AttestationID: ta.ID.String(),
 		AttesterDID:   string(ta.Attester),

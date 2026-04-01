@@ -1,4 +1,4 @@
-package toolattest_test
+package attest_test
 
 import (
 	"context"
@@ -11,27 +11,26 @@ import (
 	"github.com/fwilkerson/sigil-cli/sigil/id"
 	"github.com/fwilkerson/sigil-cli/sigil/identity"
 	"github.com/fwilkerson/sigil-cli/sigil/signing"
-	"github.com/fwilkerson/sigil-cli/sigil/toolattest"
 )
 
-func testToolAttestation(t *testing.T, kp *signing.KeyPair) *toolattest.ToolAttestation {
+func testToolAttestation(t *testing.T, kp *signing.KeyPair) *attest.ToolAttestation {
 	t.Helper()
 	tool, err := id.NewToolID("mcp://github.com/user/repo")
 	if err != nil {
 		t.Fatal(err)
 	}
-	return &toolattest.ToolAttestation{
+	return &attest.ToolAttestation{
 		ID:       id.NewToolAttestationID(),
 		Attester: identity.DIDFromKey(kp.Public),
 		Tool:     tool,
-		Outcome:  toolattest.OutcomeSuccess,
-		Claims:   map[string]string{toolattest.ClaimFunction: "search"},
+		Outcome:  attest.OutcomeSuccess,
+		Claims:   map[string]string{attest.ClaimFunction: "search"},
 		Version:  "1.2.3",
 		IssuedAt: time.Now().UTC().Truncate(time.Second),
 	}
 }
 
-func TestSealAndVerify(t *testing.T) {
+func TestToolAttest_SealAndVerify(t *testing.T) {
 	t.Parallel()
 	kp, err := signing.GenerateKeyPair()
 	if err != nil {
@@ -50,7 +49,7 @@ func TestSealAndVerify(t *testing.T) {
 	}
 }
 
-func TestSeal_RejectsInvalid(t *testing.T) {
+func TestToolAttest_Seal_RejectsInvalid(t *testing.T) {
 	t.Parallel()
 	kp, err := signing.GenerateKeyPair()
 	if err != nil {
@@ -65,7 +64,7 @@ func TestSeal_RejectsInvalid(t *testing.T) {
 	}
 }
 
-func TestSeal_RejectsKeyMismatch(t *testing.T) {
+func TestToolAttest_Seal_RejectsKeyMismatch(t *testing.T) {
 	t.Parallel()
 	kp, err := signing.GenerateKeyPair()
 	if err != nil {
@@ -86,7 +85,7 @@ func TestSeal_RejectsKeyMismatch(t *testing.T) {
 	}
 }
 
-func TestVerify_WrongKey(t *testing.T) {
+func TestToolAttest_Verify_WrongKey(t *testing.T) {
 	t.Parallel()
 	kp, err := signing.GenerateKeyPair()
 	if err != nil {
@@ -106,7 +105,7 @@ func TestVerify_WrongKey(t *testing.T) {
 	}
 }
 
-func TestVerify_TamperedClaims(t *testing.T) {
+func TestToolAttest_Verify_TamperedClaims(t *testing.T) {
 	t.Parallel()
 	kp, err := signing.GenerateKeyPair()
 	if err != nil {
@@ -118,13 +117,13 @@ func TestVerify_TamperedClaims(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	ta.Claims[toolattest.ClaimFunction] = "tampered"
+	ta.Claims[attest.ClaimFunction] = "tampered"
 	if err := attest.Verify(ta, kp.Public); err != attest.ErrInvalidSignature {
 		t.Fatalf("expected ErrInvalidSignature after tampering, got: %v", err)
 	}
 }
 
-func TestVerifyWithResolver(t *testing.T) {
+func TestToolAttest_VerifyWithResolver(t *testing.T) {
 	t.Parallel()
 	kp, err := signing.GenerateKeyPair()
 	if err != nil {
@@ -140,26 +139,26 @@ func TestVerifyWithResolver(t *testing.T) {
 	}
 }
 
-func TestValidate_MissingFields(t *testing.T) {
+func TestToolAttest_Validate_MissingFields(t *testing.T) {
 	t.Parallel()
 	kp, err := signing.GenerateKeyPair()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	base := func() *toolattest.ToolAttestation { return testToolAttestation(t, kp) }
+	base := func() *attest.ToolAttestation { return testToolAttestation(t, kp) }
 
 	tests := []struct {
 		name   string
-		mutate func(ta *toolattest.ToolAttestation)
+		mutate func(ta *attest.ToolAttestation)
 		want   string
 	}{
-		{"missing ID", func(ta *toolattest.ToolAttestation) { ta.ID = id.ToolAttestationID{} }, "missing attestation ID"},
-		{"missing attester", func(ta *toolattest.ToolAttestation) { ta.Attester = "" }, "missing attester"},
-		{"invalid attester", func(ta *toolattest.ToolAttestation) { ta.Attester = "not-a-did" }, "attester is not a valid DID"},
-		{"missing tool", func(ta *toolattest.ToolAttestation) { ta.Tool = id.ToolID{} }, "missing tool"},
-		{"invalid outcome", func(ta *toolattest.ToolAttestation) { ta.Outcome = "unknown" }, "invalid outcome"},
-		{"missing issued_at", func(ta *toolattest.ToolAttestation) { ta.IssuedAt = time.Time{} }, "missing issued_at"},
+		{"missing ID", func(ta *attest.ToolAttestation) { ta.ID = id.ToolAttestationID{} }, "missing attestation ID"},
+		{"missing attester", func(ta *attest.ToolAttestation) { ta.Attester = "" }, "missing attester"},
+		{"invalid attester", func(ta *attest.ToolAttestation) { ta.Attester = "not-a-did" }, "attester is not a valid DID"},
+		{"missing tool", func(ta *attest.ToolAttestation) { ta.Tool = id.ToolID{} }, "missing tool"},
+		{"invalid outcome", func(ta *attest.ToolAttestation) { ta.Outcome = "unknown" }, "invalid outcome"},
+		{"missing issued_at", func(ta *attest.ToolAttestation) { ta.IssuedAt = time.Time{} }, "missing issued_at"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -177,14 +176,14 @@ func TestValidate_MissingFields(t *testing.T) {
 	}
 }
 
-func TestValidate_BothOutcomes(t *testing.T) {
+func TestToolAttest_Validate_BothOutcomes(t *testing.T) {
 	t.Parallel()
 	kp, err := signing.GenerateKeyPair()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	for _, outcome := range []toolattest.Outcome{toolattest.OutcomeSuccess, toolattest.OutcomeNegative} {
+	for _, outcome := range []attest.Outcome{attest.OutcomeSuccess, attest.OutcomeNegative} {
 		t.Run(string(outcome), func(t *testing.T) {
 			t.Parallel()
 			ta := testToolAttestation(t, kp)
@@ -196,7 +195,7 @@ func TestValidate_BothOutcomes(t *testing.T) {
 	}
 }
 
-func TestValidate_ClaimsSizeLimits(t *testing.T) {
+func TestToolAttest_Validate_ClaimsSizeLimits(t *testing.T) {
 	t.Parallel()
 	kp, err := signing.GenerateKeyPair()
 	if err != nil {
@@ -217,7 +216,7 @@ func TestValidate_ClaimsSizeLimits(t *testing.T) {
 	}
 }
 
-func TestPayloadDeterminism(t *testing.T) {
+func TestToolAttest_PayloadDeterminism(t *testing.T) {
 	t.Parallel()
 	kp, err := signing.GenerateKeyPair()
 	if err != nil {
@@ -228,7 +227,7 @@ func TestPayloadDeterminism(t *testing.T) {
 	attesttest.AssertDeterministicPayload(t, ta)
 }
 
-func TestPayloadVersion(t *testing.T) {
+func TestToolAttest_PayloadVersion(t *testing.T) {
 	t.Parallel()
 	kp, err := signing.GenerateKeyPair()
 	if err != nil {
@@ -245,7 +244,7 @@ func TestPayloadVersion(t *testing.T) {
 	}
 }
 
-func TestSealable_Interface(t *testing.T) {
+func TestToolAttest_Sealable_Interface(t *testing.T) {
 	t.Parallel()
 	kp, err := signing.GenerateKeyPair()
 	if err != nil {

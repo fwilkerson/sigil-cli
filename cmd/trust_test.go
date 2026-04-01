@@ -10,8 +10,8 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	trustpb "github.com/fwilkerson/sigil-cli/api/trust/v1"
+	"github.com/fwilkerson/sigil-cli/sigil/attest"
 	"github.com/fwilkerson/sigil-cli/sigil/id"
-	"github.com/fwilkerson/sigil-cli/sigil/toolattest"
 )
 
 func toolID(t *testing.T, uri string) id.ToolID {
@@ -201,10 +201,10 @@ func TestPrintNegativeReview(t *testing.T) {
 	buf := new(bytes.Buffer)
 	cmd.SetErr(buf)
 
-	ta := &toolattest.ToolAttestation{
+	ta := &attest.ToolAttestation{
 		Tool:    toolID(t, "mcp://example.com/tool"),
 		Version: "1.0.0",
-		Outcome: toolattest.OutcomeNegative,
+		Outcome: attest.OutcomeNegative,
 		Claims:  map[string]string{"intent": "read file", "result": "failed"},
 	}
 	printNegativeReview(cmd, ta)

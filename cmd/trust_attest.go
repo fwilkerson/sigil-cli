@@ -14,7 +14,6 @@ import (
 	"github.com/fwilkerson/sigil-cli/sigil/attest"
 	"github.com/fwilkerson/sigil-cli/sigil/id"
 	"github.com/fwilkerson/sigil-cli/sigil/identity"
-	"github.com/fwilkerson/sigil-cli/sigil/toolattest"
 )
 
 func newTrustAttestCmd() *cobra.Command {
@@ -50,9 +49,9 @@ Always pass --version when available for the best signal.`,
 			client := setup.TrustClient()
 			kp := setup.KeyPair
 
-			o := toolattest.Outcome(outcome)
+			o := attest.Outcome(outcome)
 			switch o {
-			case toolattest.OutcomeSuccess:
+			case attest.OutcomeSuccess:
 				cfg, err := trustsetup.LoadConfig(configDirFrom(cmd))
 				if err != nil {
 					return err
@@ -78,11 +77,11 @@ Always pass --version when available for the best signal.`,
 					return fmt.Errorf("invalid tool URI: %w", err)
 				}
 				now := time.Now().UTC().Truncate(time.Second)
-				ta := &toolattest.ToolAttestation{
+				ta := &attest.ToolAttestation{
 					ID:       id.NewToolAttestationID(),
 					Attester: identity.DIDFromKey(kp.Public),
 					Tool:     toolID,
-					Outcome:  toolattest.OutcomeSuccess,
+					Outcome:  attest.OutcomeSuccess,
 					Claims:   map[string]string{},
 					Version:  version,
 					IssuedAt: now,
@@ -115,7 +114,7 @@ Always pass --version when available for the best signal.`,
 				cmd.Printf("Attestation submitted: %s\n", result.AttestationID)
 				return nil
 
-			case toolattest.OutcomeNegative:
+			case attest.OutcomeNegative:
 				claims := buildClaims(intent, resultMsg, function, params, errorCode)
 
 				ta, err := client.PrepareNegative(toolURI, version, claims, kp)
@@ -149,7 +148,7 @@ Always pass --version when available for the best signal.`,
 
 			default:
 				return fmt.Errorf("invalid outcome %q: must be %q or %q",
-					outcome, toolattest.OutcomeSuccess, toolattest.OutcomeNegative)
+					outcome, attest.OutcomeSuccess, attest.OutcomeNegative)
 			}
 		},
 	}
@@ -186,7 +185,7 @@ func buildClaims(intent, result, function, params, errorCode string) map[string]
 }
 
 // printNegativeReview writes the negative attestation review block to stderr.
-func printNegativeReview(cmd *cobra.Command, ta *toolattest.ToolAttestation) {
+func printNegativeReview(cmd *cobra.Command, ta *attest.ToolAttestation) {
 	cmd.PrintErrln()
 	cmd.PrintErrln("=== Negative Attestation Review ===")
 	cmd.PrintErrf("Tool:    %s\n", ta.Tool)
@@ -205,7 +204,7 @@ func printNegativeReview(cmd *cobra.Command, ta *toolattest.ToolAttestation) {
 
 // confirmNegative shows the negative attestation for mandatory pre-submission
 // review and returns true only if the user confirms.
-func confirmNegative(cmd *cobra.Command, ta *toolattest.ToolAttestation) bool {
+func confirmNegative(cmd *cobra.Command, ta *attest.ToolAttestation) bool {
 	printNegativeReview(cmd, ta)
 	cmd.PrintErr("Submit this attestation? [y/N] ")
 
@@ -221,7 +220,7 @@ func confirmNegative(cmd *cobra.Command, ta *toolattest.ToolAttestation) bool {
 
 // enqueueAttestation writes ta to the pending queue so it can be submitted
 // on the next successful connection to the trust service.
-func enqueueAttestation(cmd *cobra.Command, ta *toolattest.ToolAttestation) error {
+func enqueueAttestation(cmd *cobra.Command, ta *attest.ToolAttestation) error {
 	queue := pending.New(configDirFrom(cmd))
 	pa := &pending.Attestation{
 		AttestationID: ta.ID.String(),
