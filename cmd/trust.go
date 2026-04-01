@@ -7,17 +7,14 @@ import (
 	"github.com/spf13/cobra"
 
 	trustpb "github.com/fwilkerson/sigil-cli/api/trust/v1"
-	"github.com/fwilkerson/sigil-cli/internal/trustsetup"
-	"github.com/fwilkerson/sigil-cli/sigil/grpc"
-	"github.com/fwilkerson/sigil-cli/sigil/local/keystore"
-	"github.com/fwilkerson/sigil-cli/sigil/local/pending"
+	"github.com/fwilkerson/sigil-cli/sigil/local"
 )
 
 // addDevTrustCommands registers dev-only trust subcommands. Overridden by
 // commands_trust_dev.go in non-release builds.
 var addDevTrustCommands = func(*cobra.Command) {}
 
-type trustSetupKey struct{}
+type appKey struct{}
 
 func newTrustCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -43,18 +40,19 @@ func newTrustCmd() *cobra.Command {
 // read-only commands that do not need an identity.
 func withTrustRead(cmd *cobra.Command) *cobra.Command {
 	cmd.PreRunE = func(cmd *cobra.Command, _ []string) error {
-		addr := trustAddr(cmd)
-		setup, err := trustsetup.Connect(addr)
+		app, err := local.Connect(trustAddr(cmd), configDirFrom(cmd))
 		if err != nil {
 			return err
 		}
 		go func() {
 			<-cmd.Context().Done()
-			_ = setup.Close()
+			_ = app.Close()
 		}()
-		ctx := context.WithValue(cmd.Context(), trustSetupKey{}, setup)
+		ctx := context.WithValue(cmd.Context(), appKey{}, app)
 		cmd.SetContext(ctx)
-		flushPending(cmd, setup)
+		if n := app.FlushPending(cmd.Context()); n > 0 {
+			cmd.PrintErrf("Submitted %d pending attestation(s).\n", n)
+		}
 		return nil
 	}
 	return cmd
@@ -64,61 +62,42 @@ func withTrustRead(cmd *cobra.Command) *cobra.Command {
 // auto-identity and dials gRPC. Used by write commands (attest).
 func withTrustWrite(cmd *cobra.Command) *cobra.Command {
 	cmd.PreRunE = func(cmd *cobra.Command, _ []string) error {
-		dir := configDirFrom(cmd)
+		app, err := local.Connect(trustAddr(cmd), configDirFrom(cmd))
+		if err != nil {
+			return err
+		}
 
-		kp, did, created, err := keystore.EnsureIdentity(dir)
+		created, err := app.EnsureIdentity()
 		if err != nil {
 			return fmt.Errorf("ensure identity: %w", err)
 		}
 		if created {
-			cmd.PrintErrf("Created your Sigil identity: %s\n", did)
+			cmd.PrintErrf("Created your Sigil identity: %s\n", app.DID)
 		}
-
-		addr := trustAddr(cmd)
-		setup, err := trustsetup.Connect(addr)
-		if err != nil {
-			return err
-		}
-		setup.KeyPair = kp
-		setup.DID = did
 
 		go func() {
 			<-cmd.Context().Done()
-			_ = setup.Close()
+			_ = app.Close()
 		}()
-		ctx := context.WithValue(cmd.Context(), trustSetupKey{}, setup)
+		ctx := context.WithValue(cmd.Context(), appKey{}, app)
 		cmd.SetContext(ctx)
-		flushPending(cmd, setup)
+		if n := app.FlushPending(cmd.Context()); n > 0 {
+			cmd.PrintErrf("Submitted %d pending attestation(s).\n", n)
+		}
 		return nil
 	}
 	return cmd
 }
 
-// flushPending submits any queued attestations now that gRPC is available.
-// Prints a summary to stderr if anything was flushed. Errors are silently
-// ignored — flush is best-effort and should never block the main command.
-func flushPending(cmd *cobra.Command, setup *trustsetup.TrustSetup) {
-	queue := pending.New(configDirFrom(cmd))
-	plist, err := queue.Pending()
-	if err != nil || len(plist) == 0 {
-		return
-	}
-	sub := grpc.NewQuerier(setup.Conn)
-	submitted, _, _ := queue.Flush(cmd.Context(), sub)
-	if submitted > 0 {
-		cmd.PrintErrf("Submitted %d pending attestation(s).\n", submitted)
-	}
-}
-
-func trustSetupFrom(cmd *cobra.Command) *trustsetup.TrustSetup {
-	if v, ok := cmd.Context().Value(trustSetupKey{}).(*trustsetup.TrustSetup); ok {
+func appFrom(cmd *cobra.Command) *local.App {
+	if v, ok := cmd.Context().Value(appKey{}).(*local.App); ok {
 		return v
 	}
 	return nil
 }
 
 func trustClientFrom(cmd *cobra.Command) trustpb.TrustServiceClient {
-	return trustpb.NewTrustServiceClient(trustSetupFrom(cmd).Conn)
+	return trustpb.NewTrustServiceClient(appFrom(cmd).Conn())
 }
 
 func jsonFlag(cmd *cobra.Command) bool {

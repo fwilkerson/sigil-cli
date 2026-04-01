@@ -12,8 +12,6 @@ import (
 	"github.com/fwilkerson/sigil-cli/sigil/attest"
 	"github.com/fwilkerson/sigil-cli/sigil/id"
 	"github.com/fwilkerson/sigil-cli/sigil/identity"
-	"github.com/fwilkerson/sigil-cli/sigil/local/config"
-	"github.com/fwilkerson/sigil-cli/sigil/local/pending"
 )
 
 func newTrustAttestCmd() *cobra.Command {
@@ -45,14 +43,14 @@ Always pass --version when available for the best signal.`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			toolURI := args[0]
-			setup := trustSetupFrom(cmd)
-			client := setup.TrustClient()
-			kp := setup.KeyPair
+			app := appFrom(cmd)
+			client := app.TrustClient()
+			kp := app.KeyPair
 
 			o := attest.Outcome(outcome)
 			switch o {
 			case attest.OutcomeSuccess:
-				cfg, err := config.Load(configDirFrom(cmd))
+				cfg, err := app.LoadConfig()
 				if err != nil {
 					return err
 				}
@@ -92,7 +90,7 @@ Always pass --version when available for the best signal.`,
 
 				result, err := client.SubmitSealed(cmd.Context(), ta)
 				if err != nil {
-					if qErr := enqueueAttestation(cmd, ta); qErr != nil {
+					if qErr := app.EnqueueAttestation(ta); qErr != nil {
 						return fmt.Errorf("attest positive: %w (also failed to queue: %v)", err, qErr)
 					}
 					cmd.PrintErrln("Attestation queued for submission when server is available.")
@@ -131,7 +129,7 @@ Always pass --version when available for the best signal.`,
 
 				result, err := client.SubmitPrepared(cmd.Context(), ta, kp)
 				if err != nil {
-					if qErr := enqueueAttestation(cmd, ta); qErr != nil {
+					if qErr := app.EnqueueAttestation(ta); qErr != nil {
 						return fmt.Errorf("submit attestation: %w (also failed to queue: %v)", err, qErr)
 					}
 					cmd.PrintErrln("Attestation queued for submission when server is available.")
@@ -216,24 +214,6 @@ func confirmNegative(cmd *cobra.Command, ta *attest.ToolAttestation) bool {
 
 	answer := strings.TrimSpace(strings.ToLower(line))
 	return answer == "y" || answer == "yes"
-}
-
-// enqueueAttestation writes ta to the pending queue so it can be submitted
-// on the next successful connection to the trust service.
-func enqueueAttestation(cmd *cobra.Command, ta *attest.ToolAttestation) error {
-	queue := pending.New(configDirFrom(cmd))
-	pa := &pending.Attestation{
-		AttestationID: ta.ID.String(),
-		AttesterDID:   string(ta.Attester),
-		ToolURI:       ta.Tool.String(),
-		Outcome:       string(ta.Outcome),
-		Claims:        ta.Claims,
-		Version:       ta.Version,
-		Signature:     ta.Signature,
-		IssuedAt:      ta.IssuedAt,
-		QueuedAt:      time.Now().UTC(),
-	}
-	return queue.Enqueue(pa)
 }
 
 func printAttestJSON(cmd *cobra.Command, attID, toolURI, outcome string, deduplicated bool) error {

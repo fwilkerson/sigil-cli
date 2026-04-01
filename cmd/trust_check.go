@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -22,45 +21,23 @@ recommendation: "use" (well-trusted), "caution" (limited data or mixed),
 Agents should call this before invoking a tool to decide whether to proceed.`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client := trustSetupFrom(cmd).TrustClient()
-
-			result, err := client.Check(cmd.Context(), args[0])
+			outcome, err := appFrom(cmd).Check(cmd.Context(), args[0])
 			if err != nil {
-				// Service unreachable — try the local cache as a fallback.
-				cache := scorecache.New(configDirFrom(cmd))
-				cached, cacheErr := cache.Get(args[0])
-				if cacheErr != nil || cached == nil {
-					return fmt.Errorf("trust service unreachable (no cached data): %w", err)
-				}
+				return err
+			}
+
+			if outcome.IsCached() {
 				if jsonFlag(cmd) {
-					return printCachedCheckJSON(cmd, cached)
+					return printCachedCheckJSON(cmd, outcome.Cached)
 				}
-				printCachedCheckHuman(cmd, cached)
+				printCachedCheckHuman(cmd, outcome.Cached)
 				return nil
 			}
 
-			// Cache the successful result for future offline use.
-			cache := scorecache.New(configDirFrom(cmd))
-			cs := &scorecache.CachedScore{
-				ToolURI:          result.ToolURI,
-				Score:            result.Score,
-				Recommendation:   string(result.Recommendation),
-				Label:            result.Label,
-				Provisional:      result.Provisional,
-				HasData:          result.HasData,
-				Attestations:     result.Attestations,
-				Attesters:        result.Attesters,
-				SuccessRate:      result.SuccessRate,
-				VersionsAttested: result.VersionsAttested,
-				LatestVersion:    result.LatestVersion,
-				CachedAt:         time.Now(),
-			}
-			_ = cache.Put(args[0], cs) // best-effort; ignore write errors
-
 			if jsonFlag(cmd) {
-				return printCheckJSON(cmd, result)
+				return printCheckJSON(cmd, outcome.Live)
 			}
-			printCheckHuman(cmd, result)
+			printCheckHuman(cmd, outcome.Live)
 			return nil
 		},
 	}

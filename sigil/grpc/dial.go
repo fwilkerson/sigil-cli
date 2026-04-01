@@ -1,3 +1,4 @@
+// Package grpc provides gRPC transport adapters for the Sigil trust service.
 package grpc
 
 import (

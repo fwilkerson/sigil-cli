@@ -20,9 +20,9 @@ a canonical deletion payload with your key.`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			attestationID := args[0]
-			setup := trustSetupFrom(cmd)
-			client := setup.TrustClient()
-			kp := setup.KeyPair
+			app := appFrom(cmd)
+			client := app.TrustClient()
+			kp := app.KeyPair
 			did := identity.DIDFromKey(kp.Public)
 
 			if err := client.Retract(cmd.Context(), attestationID, did, kp); err != nil {
