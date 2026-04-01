@@ -24,6 +24,9 @@ Thumbs.db
 .env.*
 !.env.example
 
+# Claude Code (local settings are per-user)
+.claude/settings.local.json
+
 # Beads / Dolt files (added by bd init)
 .dolt/
 *.db
