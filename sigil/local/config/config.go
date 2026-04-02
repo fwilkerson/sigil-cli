@@ -41,7 +41,7 @@ func Dir() (string, error) {
 
 // Path returns the path to the config file within the config directory.
 func Path(configDir string) string {
-	return filepath.Join(configDir, "skill.json")
+	return filepath.Join(configDir, "sigil.json")
 }
 
 // Load reads the config from disk. Returns a default config if the file
