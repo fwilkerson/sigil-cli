@@ -9,8 +9,6 @@ results without loading entire files, saving significant context:
 - `findReferences` — all call sites of a function or type
 - `documentSymbol` — list or search symbols
 
-<!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:ca08a54f -->
-
 ## Beads Issue Tracker
 
 This project uses **bd (beads)** for issue tracking. Run `bd prime` to see full workflow context and commands.
@@ -41,5 +39,3 @@ bd close <id>           # Complete work
 3. **Update issue status** - Close finished work, update in-progress items
 4. **Verify** - All changes committed AND pushed
 5. **Hand off** - Provide context for next session
-
-<!-- END BEADS INTEGRATION -->
