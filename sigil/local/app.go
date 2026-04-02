@@ -21,6 +21,7 @@ import (
 	"github.com/fwilkerson/sigil-cli/sigil/local/scorecache"
 	"github.com/fwilkerson/sigil-cli/sigil/local/trust"
 	"github.com/fwilkerson/sigil-cli/sigil/signing"
+	sigiltrust "github.com/fwilkerson/sigil-cli/sigil/trust"
 )
 
 // App holds the shared state for a Sigil session: config directory, identity,
@@ -32,7 +33,7 @@ type App struct {
 	DID     identity.DID
 
 	conn       *grpc.ClientConn
-	querier    *sigilgrpc.Querier
+	querier    sigiltrust.Querier
 	client     *trust.Client
 	clientOnce sync.Once
 }
