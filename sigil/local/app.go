@@ -30,8 +30,9 @@ type App struct {
 	KeyPair *signing.KeyPair
 	DID     identity.DID
 
-	conn   *grpc.ClientConn
-	client *trust.Client
+	conn    *grpc.ClientConn
+	querier *sigilgrpc.Querier
+	client  *trust.Client
 }
 
 // CheckOutcome is the result of a trust check, which may come from the live
@@ -50,7 +51,7 @@ func Connect(addr, dir string) (*App, error) {
 	if err != nil {
 		return nil, fmt.Errorf("connect to trust service: %w", err)
 	}
-	return &App{Dir: dir, conn: conn}, nil
+	return &App{Dir: dir, conn: conn, querier: sigilgrpc.NewQuerier(conn)}, nil
 }
 
 // Close releases the gRPC connection.
@@ -81,7 +82,7 @@ func (a *App) EnsureIdentity() (created bool, err error) {
 // client is created lazily and cached for the lifetime of the App.
 func (a *App) TrustClient() *trust.Client {
 	if a.client == nil {
-		a.client = trust.NewClient(sigilgrpc.NewQuerier(a.conn))
+		a.client = trust.NewClient(a.querier)
 	}
 	return a.client
 }
@@ -100,8 +101,7 @@ func (a *App) FlushPending(ctx context.Context) int {
 	if err != nil || len(plist) == 0 {
 		return 0
 	}
-	sub := sigilgrpc.NewQuerier(a.conn)
-	submitted, _, _ := queue.Flush(ctx, sub)
+	submitted, _, _ := queue.Flush(ctx, a.querier)
 	return submitted
 }
 
