@@ -45,6 +45,12 @@ type CheckOutcome struct {
 // IsCached reports whether the outcome was served from the local cache.
 func (o *CheckOutcome) IsCached() bool { return o.Cached != nil }
 
+// New creates an App rooted at dir without a gRPC connection. Use this for
+// commands that only need local state (e.g. identity queries).
+func New(dir string) *App {
+	return &App{Dir: dir}
+}
+
 // Connect dials the trust service and returns an App rooted at dir.
 func Connect(addr, dir string) (*App, error) {
 	conn, err := grpc.NewClient(addr, sigilgrpc.DialOpts()...)
@@ -65,6 +71,16 @@ func (a *App) Close() error {
 // Conn returns the underlying gRPC client connection. Use this for operations
 // that need the raw protobuf client (e.g. ListTopTools).
 func (a *App) Conn() *grpc.ClientConn { return a.conn }
+
+// LoadIdentityMeta loads identity metadata from the local keystore.
+func (a *App) LoadIdentityMeta() (*keystore.IdentityMeta, error) {
+	return keystore.LoadIdentityMeta(a.Dir)
+}
+
+// LoadIdentity loads the signing key pair and DID from the local keystore.
+func (a *App) LoadIdentity() (*signing.KeyPair, identity.DID, error) {
+	return keystore.LoadIdentity(a.Dir)
+}
 
 // EnsureIdentity loads or creates the auto-identity. On success it populates
 // KeyPair and DID and reports whether a new identity was created.
