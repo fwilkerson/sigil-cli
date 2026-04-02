@@ -13,7 +13,7 @@ results without loading entire files, saving significant context:
 
 This project uses **bd (beads)** for issue tracking. Run `bd prime` to see full workflow context and commands.
 
-### Quick Reference
+### Task management
 
 ```bash
 bd ready                # Find available work
@@ -22,20 +22,18 @@ bd update <id> --claim  # Claim work
 bd close <id>           # Complete work
 ```
 
+### Memories
+
+```bash
+bd remember "insight"          # Save persistent knowledge
+bd remember "insight" --key k  # Save with explicit key
+bd memories --json             # List all
+bd memories <search> --json    # Search by keyword
+bd forget <key>                # Remove (to edit: forget + re-remember)
+```
+
 ### Rules
 
 - Use `bd` for ALL task tracking — do NOT use TodoWrite, TaskCreate, or markdown TODO lists
 - Run `bd prime` for detailed command reference and session close protocol
 - Use `bd remember` for persistent knowledge — do NOT use MEMORY.md files
-
-## Session Completion
-
-**When ending a work session**, you MUST complete ALL steps below.
-
-**MANDATORY WORKFLOW:**
-
-1. **File issues for remaining work** - Create issues for anything that needs follow-up
-2. **Run quality gates** (if code changed) - Tests, linters, builds
-3. **Update issue status** - Close finished work, update in-progress items
-4. **Verify** - All changes committed AND pushed
-5. **Hand off** - Provide context for next session
