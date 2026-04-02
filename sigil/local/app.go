@@ -7,6 +7,7 @@ package local
 import (
 	"context"
 	"fmt"
+	"sync"
 	"time"
 
 	"google.golang.org/grpc"
@@ -30,9 +31,10 @@ type App struct {
 	KeyPair *signing.KeyPair
 	DID     identity.DID
 
-	conn    *grpc.ClientConn
-	querier *sigilgrpc.Querier
-	client  *trust.Client
+	conn       *grpc.ClientConn
+	querier    *sigilgrpc.Querier
+	client     *trust.Client
+	clientOnce sync.Once
 }
 
 // CheckOutcome is the result of a trust check, which may come from the live
@@ -97,9 +99,9 @@ func (a *App) EnsureIdentity() (created bool, err error) {
 // TrustClient returns a [trust.Client] backed by the gRPC connection. The
 // client is created lazily and cached for the lifetime of the App.
 func (a *App) TrustClient() *trust.Client {
-	if a.client == nil {
+	a.clientOnce.Do(func() {
 		a.client = trust.NewClient(a.querier)
-	}
+	})
 	return a.client
 }
 
