@@ -7,6 +7,7 @@ proto:
         api/trust/v1/trust.proto
     @# protoc-gen-go-grpc v1.6.x has no gen-server=false flag, so strip
     @# server stubs (interfaces, handlers, ServiceDesc) after generation.
-    sed -i '' '/^\/\/ TrustServiceServer is the server API/,$d' \
+    sed -i.bak '/^\/\/ TrustServiceServer is the server API/,$d' \
         api/trust/v1/trust_grpc.pb.go
+    rm -f api/trust/v1/trust_grpc.pb.go.bak
     goimports -w api/trust/v1/trust_grpc.pb.go
