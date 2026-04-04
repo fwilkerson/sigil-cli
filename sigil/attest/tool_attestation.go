@@ -31,15 +31,6 @@ const (
 	// negative attestations. Positive auto-attestations should not include
 	// params at all.
 	ClaimParams = "params"
-
-	// ClaimLatencyMS is the tool invocation latency in milliseconds.
-	ClaimLatencyMS = "latency_ms"
-
-	// ClaimInvocations is the number of times the tool was invoked.
-	ClaimInvocations = "invocations"
-
-	// ClaimToolVersion records the tool version.
-	ClaimToolVersion = "tool_version"
 )
 
 // ToolAttestation is a signed attestation from a user about a tool.

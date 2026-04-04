@@ -165,19 +165,19 @@ Always pass --version when available for the best signal.`,
 func buildClaims(intent, result, function, params, errorCode string) map[string]string {
 	claims := make(map[string]string)
 	if intent != "" {
-		claims["intent"] = intent
+		claims[attest.ClaimIntent] = intent
 	}
 	if result != "" {
-		claims["result"] = result
+		claims[attest.ClaimResult] = result
 	}
 	if function != "" {
-		claims["function"] = function
+		claims[attest.ClaimFunction] = function
 	}
 	if params != "" {
-		claims["params"] = params
+		claims[attest.ClaimParams] = params
 	}
 	if errorCode != "" {
-		claims["error_code"] = errorCode
+		claims[attest.ClaimErrorCode] = errorCode
 	}
 	return claims
 }
