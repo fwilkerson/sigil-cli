@@ -5,6 +5,7 @@ package keystore
 import (
 	"crypto/ed25519"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -34,7 +35,7 @@ func EnsureIdentity(configDir string) (*signing.KeyPair, identity.DID, bool, err
 	if err == nil {
 		return kp, did, false, nil
 	}
-	if !os.IsNotExist(err) {
+	if !errors.Is(err, os.ErrNotExist) {
 		return nil, "", false, fmt.Errorf("load identity: %w", err)
 	}
 

@@ -3,6 +3,7 @@ package config
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -48,7 +49,7 @@ func Path(configDir string) string {
 // does not exist.
 func Load(configDir string) (*Config, error) {
 	data, err := os.ReadFile(Path(configDir))
-	if os.IsNotExist(err) {
+	if errors.Is(err, os.ErrNotExist) {
 		return &Config{}, nil
 	}
 	if err != nil {

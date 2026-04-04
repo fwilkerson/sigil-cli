@@ -7,6 +7,7 @@ package pending
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -77,7 +78,7 @@ func (q *Queue) Enqueue(pa *Attestation) error {
 // creation order). Returns nil, nil when the queue directory does not exist.
 func (q *Queue) Pending() ([]*Attestation, error) {
 	entries, err := os.ReadDir(q.dir)
-	if os.IsNotExist(err) {
+	if errors.Is(err, os.ErrNotExist) {
 		return nil, nil
 	}
 	if err != nil {
@@ -111,7 +112,7 @@ func (q *Queue) Pending() ([]*Attestation, error) {
 // "01ARZ3NDEKTSV4RRFFQ69G5FAV.json").
 func (q *Queue) Remove(filename string) error {
 	path := filepath.Join(q.dir, filepath.Base(filename))
-	if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+	if err := os.Remove(path); err != nil && !errors.Is(err, os.ErrNotExist) {
 		return fmt.Errorf("remove pending attestation %s: %w", filename, err)
 	}
 	return nil
