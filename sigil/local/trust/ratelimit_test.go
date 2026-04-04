@@ -35,19 +35,3 @@ func TestSessionLimiter_WithCooldown(t *testing.T) {
 		t.Fatal("call after cooldown should be allowed")
 	}
 }
-
-func TestSessionLimiter_Reset(t *testing.T) {
-	l := NewSessionLimiter(0)
-	toolURI := "mcp://example.com/tool"
-
-	l.Allow(toolURI)
-	if l.Allow(toolURI) {
-		t.Fatal("should be blocked before reset")
-	}
-
-	l.Reset()
-
-	if !l.Allow(toolURI) {
-		t.Fatal("should be allowed after reset")
-	}
-}

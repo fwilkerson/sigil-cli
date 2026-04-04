@@ -43,14 +43,6 @@ func NewClient(q sigiltrust.Querier) *Client {
 	}
 }
 
-// NewClientWithLimiter creates a trust client with a custom rate limiter.
-func NewClientWithLimiter(q sigiltrust.Querier, limiter *SessionLimiter) *Client {
-	return &Client{
-		querier: q,
-		limiter: limiter,
-	}
-}
-
 // Check queries the trust score for a tool and returns a recommendation.
 func (c *Client) Check(ctx context.Context, toolURI string) (*CheckResult, error) {
 	// Validate tool URI.
@@ -78,40 +70,6 @@ func (c *Client) Check(ctx context.Context, toolURI string) (*CheckResult, error
 		VersionsAttested: result.VersionsAttested,
 		LatestVersion:    result.LatestVersion,
 	}, nil
-}
-
-// AttestPositive creates and submits a positive attestation for a tool.
-// It returns nil result if rate-limited (silently skipped). Positive
-// attestations include only the tool ID, outcome, and version — no params,
-// no agent_runtime.
-func (c *Client) AttestPositive(ctx context.Context, toolURI, version string, kp *signing.KeyPair) (*sigiltrust.SubmitResult, error) {
-	if !c.limiter.Allow(toolURI) {
-		return nil, nil // silently skip
-	}
-
-	toolID, err := id.NewToolID(toolURI)
-	if err != nil {
-		return nil, fmt.Errorf("invalid tool URI: %w", err)
-	}
-
-	attesterDID := identity.DIDFromKey(kp.Public)
-	now := time.Now().UTC().Truncate(time.Second)
-
-	ta := &attest.ToolAttestation{
-		ID:       id.NewToolAttestationID(),
-		Attester: attesterDID,
-		Tool:     toolID,
-		Outcome:  attest.OutcomeSuccess,
-		Claims:   map[string]string{},
-		Version:  version,
-		IssuedAt: now,
-	}
-
-	if err := attest.Seal(ta, kp); err != nil {
-		return nil, fmt.Errorf("seal attestation: %w", err)
-	}
-
-	return c.submitAttestation(ctx, ta)
 }
 
 // PrepareNegative builds a negative attestation for pre-submission review.
@@ -158,8 +116,8 @@ func (c *Client) SubmitPrepared(ctx context.Context, ta *attest.ToolAttestation,
 
 // Limiter returns the session limiter for direct inspection or allow checks.
 // Callers that build and seal attestations locally (to support offline queuing)
-// can call Limiter().Allow(toolURI) before building, matching the same rate
-// limit that AttestPositive enforces internally.
+// can call Limiter().Allow(toolURI) before building to enforce per-session
+// rate limits.
 func (c *Client) Limiter() *SessionLimiter { return c.limiter }
 
 // SubmitSealed submits a pre-built, pre-signed attestation without rebuilding

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"testing"
-	"time"
 
 	"github.com/fwilkerson/sigil-cli/sigil/identity"
 	"github.com/fwilkerson/sigil-cli/sigil/signing"
@@ -135,70 +134,6 @@ func TestClient_Check_QuerierError(t *testing.T) {
 	}
 }
 
-func TestClient_AttestPositive(t *testing.T) {
-	q := &mockQuerier{submitID: "att-123"}
-	c := NewClient(q)
-
-	kp, err := signing.GenerateKeyPair()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	res, err := c.AttestPositive(context.Background(), "mcp://github.com/example/tool", "1.0.0", kp)
-	if err != nil {
-		t.Fatalf("AttestPositive() error: %v", err)
-	}
-	if res == nil {
-		t.Fatal("AttestPositive() returned nil result")
-	}
-	if res.AttestationID != "att-123" {
-		t.Errorf("ID = %q, want %q", res.AttestationID, "att-123")
-	}
-	if len(q.submissions) != 1 {
-		t.Fatalf("submissions = %d, want 1", len(q.submissions))
-	}
-	sub := q.submissions[0]
-	if sub.Outcome != "success" {
-		t.Errorf("Outcome = %q, want %q", sub.Outcome, "success")
-	}
-	if len(sub.Signature) == 0 {
-		t.Error("Signature should not be empty")
-	}
-}
-
-func TestClient_AttestPositive_RateLimited(t *testing.T) {
-	q := &mockQuerier{submitID: "att-123"}
-	c := NewClient(q)
-
-	kp, err := signing.GenerateKeyPair()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	toolURI := "mcp://github.com/example/tool"
-
-	// First call succeeds.
-	res, err := c.AttestPositive(context.Background(), toolURI, "1.0.0", kp)
-	if err != nil {
-		t.Fatalf("first AttestPositive() error: %v", err)
-	}
-	if res == nil {
-		t.Error("first call should return a result")
-	}
-
-	// Second call is rate-limited.
-	res, err = c.AttestPositive(context.Background(), toolURI, "1.0.0", kp)
-	if err != nil {
-		t.Fatalf("second AttestPositive() error: %v", err)
-	}
-	if res != nil {
-		t.Error("second call should return nil (rate-limited)")
-	}
-	if len(q.submissions) != 1 {
-		t.Errorf("submissions = %d, want 1 (second should be skipped)", len(q.submissions))
-	}
-}
-
 func TestClient_PrepareAndSubmitNegative(t *testing.T) {
 	q := &mockQuerier{submitID: "neg-456"}
 	c := NewClient(q)
@@ -252,31 +187,6 @@ func TestClient_PrepareNegative_InvalidURI(t *testing.T) {
 	_, err = c.PrepareNegative("bad-uri", "1.0", nil, kp)
 	if err == nil {
 		t.Fatal("PrepareNegative() should error on invalid URI")
-	}
-}
-
-func TestClient_WithCooldownLimiter(t *testing.T) {
-	q := &mockQuerier{submitID: "att-1"}
-	limiter := NewSessionLimiter(24 * time.Hour)
-	c := NewClientWithLimiter(q, limiter)
-
-	kp, err := signing.GenerateKeyPair()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	_, err = c.AttestPositive(context.Background(), "mcp://github.com/example/tool", "1.0", kp)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Second call within 24h is rate-limited.
-	res, err := c.AttestPositive(context.Background(), "mcp://github.com/example/tool", "1.0", kp)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if res != nil {
-		t.Error("should be rate-limited within cooldown")
 	}
 }
 

@@ -42,10 +42,3 @@ func (l *SessionLimiter) allowAt(toolURI string, now time.Time) bool {
 	l.seen[toolURI] = now
 	return true
 }
-
-// Reset clears all rate limit state.
-func (l *SessionLimiter) Reset() {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	l.seen = make(map[string]time.Time)
-}
