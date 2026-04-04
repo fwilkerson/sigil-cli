@@ -71,9 +71,10 @@ func (a *App) Close() error {
 	return nil
 }
 
-// Conn returns the underlying gRPC client connection. Use this for operations
-// that need the raw protobuf client (e.g. ListTopTools).
-func (a *App) Conn() *grpc.ClientConn { return a.conn }
+// ListTopTools returns the top tools ranked by trust score.
+func (a *App) ListTopTools(ctx context.Context, windowDays, limit int32) ([]sigiltrust.ToolSummary, error) {
+	return a.querier.ListTopTools(ctx, windowDays, limit)
+}
 
 // LoadIdentityMeta loads identity metadata from the local keystore.
 func (a *App) LoadIdentityMeta() (*keystore.IdentityMeta, error) {

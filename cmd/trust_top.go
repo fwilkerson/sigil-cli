@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	trustpb "github.com/fwilkerson/sigil-cli/api/trust/v1"
+	sigiltrust "github.com/fwilkerson/sigil-cli/sigil/trust"
 )
 
 func newTrustTopCmd() *cobra.Command {
@@ -19,25 +19,20 @@ func newTrustTopCmd() *cobra.Command {
 		Use:   "top",
 		Short: "List top tools by trust score",
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			client := trustClientFrom(cmd)
-
-			resp, err := client.ListTopTools(cmd.Context(), &trustpb.ListTopToolsRequest{
-				WindowDays: days,
-				Limit:      limit,
-			})
+			tools, err := appFrom(cmd).ListTopTools(cmd.Context(), days, limit)
 			if err != nil {
 				return fmt.Errorf("trust service unreachable: %w", err)
 			}
 
-			if len(resp.Tools) == 0 {
+			if len(tools) == 0 {
 				cmd.Println("No tools found.")
 				return nil
 			}
 
 			if jsonFlag(cmd) {
-				return printTopJSON(cmd, resp.Tools)
+				return printTopJSON(cmd, tools)
 			}
-			printTopHuman(cmd, resp.Tools)
+			printTopHuman(cmd, tools)
 			return nil
 		},
 	}
@@ -47,13 +42,13 @@ func newTrustTopCmd() *cobra.Command {
 	return cmd
 }
 
-func printTopJSON(cmd *cobra.Command, tools []*trustpb.ToolSummary) error {
+func printTopJSON(cmd *cobra.Command, tools []sigiltrust.ToolSummary) error {
 	type entry struct {
 		ToolURI           string  `json:"tool_uri"`
 		Score             float64 `json:"score"`
 		Label             string  `json:"label"`
-		TotalAttestations int32   `json:"total_attestations"`
-		UniqueAttesters   int32   `json:"unique_attesters"`
+		TotalAttestations int     `json:"total_attestations"`
+		UniqueAttesters   int     `json:"unique_attesters"`
 		SuccessRate       float64 `json:"success_rate"`
 		Provisional       bool    `json:"provisional"`
 		FirstSeen         string  `json:"first_seen,omitempty"`
@@ -62,7 +57,7 @@ func printTopJSON(cmd *cobra.Command, tools []*trustpb.ToolSummary) error {
 	var entries []entry
 	for _, t := range tools {
 		e := entry{
-			ToolURI:           t.ToolUri,
+			ToolURI:           t.ToolURI,
 			Score:             t.Score,
 			Label:             scoreLabel(t.Score, t.TotalAttestations, t.Provisional),
 			TotalAttestations: t.TotalAttestations,
@@ -70,11 +65,11 @@ func printTopJSON(cmd *cobra.Command, tools []*trustpb.ToolSummary) error {
 			SuccessRate:       t.SuccessRate,
 			Provisional:       t.Provisional,
 		}
-		if t.FirstSeen != nil {
-			e.FirstSeen = t.FirstSeen.AsTime().Format("2006-01-02")
+		if !t.FirstSeen.IsZero() {
+			e.FirstSeen = t.FirstSeen.Format("2006-01-02")
 		}
-		if t.LastActive != nil {
-			e.LastActive = t.LastActive.AsTime().Format("2006-01-02")
+		if !t.LastActive.IsZero() {
+			e.LastActive = t.LastActive.Format("2006-01-02")
 		}
 		entries = append(entries, e)
 	}
@@ -86,12 +81,12 @@ func printTopJSON(cmd *cobra.Command, tools []*trustpb.ToolSummary) error {
 	return nil
 }
 
-func printTopHuman(cmd *cobra.Command, tools []*trustpb.ToolSummary) {
+func printTopHuman(cmd *cobra.Command, tools []sigiltrust.ToolSummary) {
 	cmd.Printf("%-40s  %6s  %-24s  %6s  %8s\n", "TOOL", "SCORE", "LABEL", "ATTEST", "SUCCESS")
 	for _, t := range tools {
 		label := scoreLabel(t.Score, t.TotalAttestations, t.Provisional)
 		cmd.Printf("%-40s  %6.2f  %-24s  %6d  %7.0f%%\n",
-			t.ToolUri,
+			t.ToolURI,
 			t.Score,
 			label,
 			t.TotalAttestations,

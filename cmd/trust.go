@@ -6,7 +6,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	trustpb "github.com/fwilkerson/sigil-cli/api/trust/v1"
 	"github.com/fwilkerson/sigil-cli/sigil/local"
 )
 
@@ -96,17 +95,13 @@ func appFrom(cmd *cobra.Command) *local.App {
 	return nil
 }
 
-func trustClientFrom(cmd *cobra.Command) trustpb.TrustServiceClient {
-	return trustpb.NewTrustServiceClient(appFrom(cmd).Conn())
-}
-
 func jsonFlag(cmd *cobra.Command) bool {
 	v, _ := cmd.Flags().GetBool("json")
 	return v
 }
 
 // scoreLabel returns a human-friendly interpretation of a trust score.
-func scoreLabel(score float64, totalAttestations int32, provisional bool) string {
+func scoreLabel(score float64, totalAttestations int, provisional bool) string {
 	if totalAttestations == 0 {
 		return "unknown — no attestations yet"
 	}

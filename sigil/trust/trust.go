@@ -13,6 +13,11 @@ type Querier interface {
 	// GetToolTrust returns the trust digest for a tool URI.
 	GetToolTrust(ctx context.Context, toolURI string) (*ToolTrustResult, error)
 
+	// ListTopTools returns the top tools ranked by trust score within a
+	// time window. windowDays controls the lookback period and limit caps
+	// the number of results.
+	ListTopTools(ctx context.Context, windowDays, limit int32) ([]ToolSummary, error)
+
 	// SubmitAttestation submits a signed attestation and returns the result.
 	SubmitAttestation(ctx context.Context, req *AttestationSubmission) (*SubmitResult, error)
 
@@ -37,6 +42,18 @@ type ToolTrustResult struct {
 	LastActive        time.Time
 	VersionsAttested  int
 	LatestVersion     string
+}
+
+// ToolSummary is a tool entry in the top-tools leaderboard.
+type ToolSummary struct {
+	ToolURI           string
+	Score             float64
+	TotalAttestations int
+	UniqueAttesters   int
+	SuccessRate       float64
+	Provisional       bool
+	FirstSeen         time.Time
+	LastActive        time.Time
 }
 
 // AttestationSubmission carries a signed attestation to the backend.

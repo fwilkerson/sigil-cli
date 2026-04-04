@@ -37,6 +37,10 @@ func (m *mockQuerier) SubmitAttestation(_ context.Context, req *sigiltrust.Attes
 	return &sigiltrust.SubmitResult{AttestationID: m.submitID, Deduplicated: m.submitDedup}, nil
 }
 
+func (m *mockQuerier) ListTopTools(_ context.Context, _, _ int32) ([]sigiltrust.ToolSummary, error) {
+	return nil, nil
+}
+
 func (m *mockQuerier) RetractAttestation(_ context.Context, _, _ string, _ []byte) error {
 	return nil
 }

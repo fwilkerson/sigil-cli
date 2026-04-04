@@ -47,6 +47,36 @@ func (q *Querier) GetToolTrust(ctx context.Context, toolURI string) (*sigiltrust
 	return result, nil
 }
 
+// ListTopTools implements [sigiltrust.Querier].
+func (q *Querier) ListTopTools(ctx context.Context, windowDays, limit int32) ([]sigiltrust.ToolSummary, error) {
+	resp, err := q.client.ListTopTools(ctx, &trustpb.ListTopToolsRequest{
+		WindowDays: windowDays,
+		Limit:      limit,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	tools := make([]sigiltrust.ToolSummary, len(resp.Tools))
+	for i, t := range resp.Tools {
+		tools[i] = sigiltrust.ToolSummary{
+			ToolURI:           t.ToolUri,
+			Score:             t.Score,
+			TotalAttestations: int(t.TotalAttestations),
+			UniqueAttesters:   int(t.UniqueAttesters),
+			SuccessRate:       t.SuccessRate,
+			Provisional:       t.Provisional,
+		}
+		if t.FirstSeen != nil {
+			tools[i].FirstSeen = t.FirstSeen.AsTime()
+		}
+		if t.LastActive != nil {
+			tools[i].LastActive = t.LastActive.AsTime()
+		}
+	}
+	return tools, nil
+}
+
 // SubmitAttestation implements [sigiltrust.Querier].
 func (q *Querier) SubmitAttestation(ctx context.Context, req *sigiltrust.AttestationSubmission) (*sigiltrust.SubmitResult, error) {
 	resp, err := q.client.SubmitAttestation(ctx, &trustpb.SubmitAttestationRequest{

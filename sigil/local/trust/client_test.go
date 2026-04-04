@@ -24,6 +24,10 @@ func (m *mockQuerier) GetToolTrust(_ context.Context, _ string) (*sigiltrust.Too
 	return m.trustResult, m.trustErr
 }
 
+func (m *mockQuerier) ListTopTools(_ context.Context, _, _ int32) ([]sigiltrust.ToolSummary, error) {
+	return nil, nil
+}
+
 func (m *mockQuerier) RetractAttestation(_ context.Context, attestationID, _ string, _ []byte) error {
 	if m.submitErr != nil {
 		return m.submitErr

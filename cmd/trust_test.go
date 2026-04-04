@@ -7,11 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"google.golang.org/protobuf/types/known/timestamppb"
-
-	trustpb "github.com/fwilkerson/sigil-cli/api/trust/v1"
 	"github.com/fwilkerson/sigil-cli/sigil/attest"
 	"github.com/fwilkerson/sigil-cli/sigil/id"
+	sigiltrust "github.com/fwilkerson/sigil-cli/sigil/trust"
 )
 
 func toolID(t *testing.T, uri string) id.ToolID {
@@ -31,7 +29,7 @@ func TestScoreLabel(t *testing.T) {
 	tests := []struct {
 		name              string
 		score             float64
-		totalAttestations int32
+		totalAttestations int
 		provisional       bool
 		want              string
 	}{
@@ -70,15 +68,15 @@ func TestPrintTopJSON(t *testing.T) {
 	cmd.SetOut(buf)
 
 	now := time.Now()
-	tools := []*trustpb.ToolSummary{
+	tools := []sigiltrust.ToolSummary{
 		{
-			ToolUri:           "mcp://example.com/tool-a",
+			ToolURI:           "mcp://example.com/tool-a",
 			Score:             0.90,
 			TotalAttestations: 200,
 			UniqueAttesters:   50,
 			SuccessRate:       0.95,
-			FirstSeen:         timestamppb.New(now.AddDate(0, -3, 0)),
-			LastActive:        timestamppb.New(now),
+			FirstSeen:         now.AddDate(0, -3, 0),
+			LastActive:        now,
 		},
 	}
 	if err := printTopJSON(cmd, tools); err != nil {
@@ -104,15 +102,15 @@ func TestPrintTopHuman(t *testing.T) {
 	cmd.SetOut(buf)
 
 	now := time.Now()
-	tools := []*trustpb.ToolSummary{
+	tools := []sigiltrust.ToolSummary{
 		{
-			ToolUri:           "mcp://example.com/tool",
+			ToolURI:           "mcp://example.com/tool",
 			Score:             0.75,
 			TotalAttestations: 80,
 			UniqueAttesters:   25,
 			SuccessRate:       0.88,
-			FirstSeen:         timestamppb.New(now.AddDate(0, -2, 0)),
-			LastActive:        timestamppb.New(now),
+			FirstSeen:         now.AddDate(0, -2, 0),
+			LastActive:        now,
 		},
 	}
 	printTopHuman(cmd, tools)
