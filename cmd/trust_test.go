@@ -21,44 +21,6 @@ func toolID(t *testing.T, uri string) id.ToolID {
 	return tid
 }
 
-// --- scoreLabel tests ---
-
-func TestScoreLabel(t *testing.T) {
-	t.Parallel()
-
-	tests := []struct {
-		name              string
-		score             float64
-		totalAttestations int
-		provisional       bool
-		want              string
-	}{
-		{"unknown", 0, 0, false, "unknown — no attestations yet"},
-		{"provisional", 0.5, 3, true, "provisional — limited data"},
-		{"well-trusted", 0.85, 100, false, "well-trusted"},
-		{"well-trusted boundary", 0.80, 50, false, "well-trusted"},
-		{"moderate trust", 0.65, 50, false, "moderate trust"},
-		{"moderate trust boundary", 0.60, 50, false, "moderate trust"},
-		{"mixed reviews", 0.45, 50, false, "mixed reviews"},
-		{"mixed reviews boundary", 0.40, 50, false, "mixed reviews"},
-		{"low trust", 0.25, 50, false, "low trust"},
-		{"low trust boundary", 0.20, 50, false, "low trust"},
-		{"poor trust", 0.10, 50, false, "poor trust"},
-		{"poor trust zero", 0.0, 10, false, "poor trust"},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-			got := scoreLabel(tt.score, tt.totalAttestations, tt.provisional)
-			if got != tt.want {
-				t.Errorf("scoreLabel(%v, %v, %v) = %q, want %q",
-					tt.score, tt.totalAttestations, tt.provisional, got, tt.want)
-			}
-		})
-	}
-}
-
 // --- Top formatting tests (ungated: newTrustTopCmd stays in release) ---
 
 func TestPrintTopJSON(t *testing.T) {
@@ -119,8 +81,8 @@ func TestPrintTopHuman(t *testing.T) {
 	if !strings.Contains(out, "TOOL") {
 		t.Errorf("expected header with TOOL, got: %s", out)
 	}
-	if !strings.Contains(out, "moderate trust") {
-		t.Errorf("expected 'moderate trust' label, got: %s", out)
+	if !strings.Contains(out, "well-trusted") {
+		t.Errorf("expected 'well-trusted' label, got: %s", out)
 	}
 }
 

@@ -99,25 +99,3 @@ func jsonFlag(cmd *cobra.Command) bool {
 	v, _ := cmd.Flags().GetBool("json")
 	return v
 }
-
-// scoreLabel returns a human-friendly interpretation of a trust score.
-func scoreLabel(score float64, totalAttestations int, provisional bool) string {
-	if totalAttestations == 0 {
-		return "unknown — no attestations yet"
-	}
-	if provisional {
-		return "provisional — limited data"
-	}
-	switch {
-	case score >= 0.8:
-		return "well-trusted"
-	case score >= 0.6:
-		return "moderate trust"
-	case score >= 0.4:
-		return "mixed reviews"
-	case score >= 0.2:
-		return "low trust"
-	default:
-		return "poor trust"
-	}
-}

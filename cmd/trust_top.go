@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	localtrust "github.com/fwilkerson/sigil-cli/sigil/local/trust"
 	sigiltrust "github.com/fwilkerson/sigil-cli/sigil/trust"
 )
 
@@ -56,10 +57,11 @@ func printTopJSON(cmd *cobra.Command, tools []sigiltrust.ToolSummary) error {
 	}
 	var entries []entry
 	for _, t := range tools {
+		_, label := localtrust.Recommend(t.Score, t.TotalAttestations, t.Provisional)
 		e := entry{
 			ToolURI:           t.ToolURI,
 			Score:             t.Score,
-			Label:             scoreLabel(t.Score, t.TotalAttestations, t.Provisional),
+			Label:             label,
 			TotalAttestations: t.TotalAttestations,
 			UniqueAttesters:   t.UniqueAttesters,
 			SuccessRate:       t.SuccessRate,
@@ -84,7 +86,7 @@ func printTopJSON(cmd *cobra.Command, tools []sigiltrust.ToolSummary) error {
 func printTopHuman(cmd *cobra.Command, tools []sigiltrust.ToolSummary) {
 	cmd.Printf("%-40s  %6s  %-24s  %6s  %8s\n", "TOOL", "SCORE", "LABEL", "ATTEST", "SUCCESS")
 	for _, t := range tools {
-		label := scoreLabel(t.Score, t.TotalAttestations, t.Provisional)
+		_, label := localtrust.Recommend(t.Score, t.TotalAttestations, t.Provisional)
 		cmd.Printf("%-40s  %6.2f  %-24s  %6d  %7.0f%%\n",
 			t.ToolURI,
 			t.Score,
