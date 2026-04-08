@@ -25,7 +25,6 @@ bd close <id>           # Complete work
 ### Memories
 
 ```bash
-bd remember "insight"          # Save persistent knowledge
 bd remember "insight" --key k  # Save with explicit key
 bd memories --json             # List all
 bd memories <search> --json    # Search by keyword
