@@ -75,7 +75,7 @@ jobs:
 
       - uses: webfactory/ssh-agent@dc588b651fe13675774614f8e6a936a468676387 # v0.9.0
         with:
-          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+          ssh-private-key: ${{ secrets.DEPLOY_CLI_SSH_KEY }}
 
       - name: Configure known hosts
         run: |
@@ -83,7 +83,7 @@ jobs:
           echo "${{ secrets.DEPLOY_HOST }} ${{ vars.DEPLOY_HOST_KEY }}" >> ~/.ssh/known_hosts
 
       - name: Upload artifacts to server
-        run: scp dist/sigil-* dist/checksums.txt dist/version dist/install.sh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/opt/sigil-trust/dist/
+        run: tar czf - -C dist . | ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} deploy-cli upload
 
       - name: Verify deployment
-        run: ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} cat /opt/sigil-trust/dist/version
+        run: ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} deploy-cli verify
