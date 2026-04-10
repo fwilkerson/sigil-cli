@@ -37,6 +37,9 @@ jobs:
             shasum -a 256 "$f" | awk '{print $1}' > "${f}.sha256"
           done
 
+      - name: Include install script
+        run: cp scripts/install.sh dist/
+
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: dist
@@ -77,10 +80,10 @@ jobs:
       - name: Configure known hosts
         run: |
           mkdir -p ~/.ssh
-          echo "${{ vars.DEPLOY_HOST }} ${{ vars.DEPLOY_HOST_KEY }}" >> ~/.ssh/known_hosts
+          echo "${{ secrets.DEPLOY_HOST }} ${{ vars.DEPLOY_HOST_KEY }}" >> ~/.ssh/known_hosts
 
       - name: Upload artifacts to server
-        run: scp dist/sigil-* dist/checksums.txt dist/version ${{ vars.DEPLOY_USER }}@${{ vars.DEPLOY_HOST }}:/opt/sigil-trust/dist/
+        run: scp dist/sigil-* dist/checksums.txt dist/version dist/install.sh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/opt/sigil-trust/dist/
 
       - name: Verify deployment
-        run: ssh ${{ vars.DEPLOY_USER }}@${{ vars.DEPLOY_HOST }} cat /opt/sigil-trust/dist/version
+        run: ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} cat /opt/sigil-trust/dist/version
